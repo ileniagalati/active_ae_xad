@@ -25,12 +25,12 @@ from tkinter import ttk #install python-tk@3.10
 from PIL import Image, ImageTk #install Pillow
 import numpy as np
 from PIL import ImageDraw
-from aexad.tools.utils import plot_image
+from aexad.tools.utils import plot_image_tosave
 
 def f(x):
     return 1-x
 
-def training_aexad(data_path,epochs):
+def training_active_aexad(data_path,epochs):
     heatmaps, scores, _, _, tot_time = launch_aexad(data_path, epochs, 16, 32, (28*28) / 25, None, f, 'conv',
                                                     save_intermediate=True, save_path=ret_path)
     np.save(open(os.path.join(ret_path, 'aexad_htmaps.npy'), 'wb'), heatmaps)
@@ -40,9 +40,8 @@ def training_aexad(data_path,epochs):
 
     return heatmaps, scores, _, _, tot_time
 
-def run_mask_generation():
-    mask_generation="/Users/ileniagalati/uni archivio/magistrale/active_ae_xad/mask_generation.sh"
-    subprocess.run([mask_generation])
+def run_mask_generation(from_path,to_path):
+    subprocess.run(["python3", "MaskGenerator.py" ,"-from_path",from_path,"-to_path",to_path])
 
 if __name__ == '__main__':
 
@@ -91,7 +90,7 @@ if __name__ == '__main__':
 
     for x in range(0, b):
 
-        heatmaps, scores, _, _, tot_time = training_aexad(data_path,epochs=1)
+        heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=1)
 
         active_images=os.path.join("active_results",str(args.ds),"class_"+str(args.c))
         if not os.path.exists(active_images):
@@ -103,14 +102,22 @@ if __name__ == '__main__':
         idx = np.argsort(scores_aexad_conv[Y_test == 1])[::-1]
         htmaps_f = gaussian_blur2d(torch.from_numpy(htmaps_aexad_conv), kernel_size=(7, 7),sigma=(2, 2))
 
+        img="a"
+        ext=".png"
+
         #query selection per il momento prendo l'immagine con il deviation score più alto
-        plot_image(X_test[Y_test==1][idx[1]])
-        plt.savefig(os.path.join(active_images,"a.png"))
+        plot_image_tosave(X_train[Y_train==1][idx[1]])
+        plt.savefig(os.path.join(active_images,img+ext))
 
         mask_images=os.path.join("mask_results",str(args.ds),"class_"+str(args.c))
         if not os.path.exists(mask_images):
             os.makedirs(mask_images)
 
-        run_mask_generation()
+        from_path=os.path.join(active_images,img+ext)
+        to_path=os.path.join(mask_images,img+"_mask"+ext)
+        #if not os.path.exists(to_path):
+         #   os.makedirs(to_path)
+        run_mask_generation(from_path,to_path)
+        print("finished iteration")
 
     shutil.rmtree(data_path)

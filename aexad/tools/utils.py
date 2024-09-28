@@ -49,6 +49,37 @@ def plot_heatmap(image, colorbar=True):
         plt.colorbar()
     plt.show()
 
+def plot_image_tosave(image, cmap='gray'):
+    '''
+    Method to plot an image
+    :param image: (C x H x W) channel-first-format image
+    :return:
+    '''
+    if image.shape[0] == 1:
+        image = image[0, :, :]
+    else:
+        image = np.swapaxes(image, 0, 1)
+        image = np.swapaxes(image, 1, 2)
+
+    plt.imshow(image, cmap=cmap)
+    plt.axis('off')
+# plt.show()
+
+
+def plot_heatmap_tosave(image, colorbar=True):
+    '''
+    Method to plot a heatmap
+    :param image: (1 x H x W) channel-first-format image
+    :return:
+    '''
+    image = image[0, :, :]
+
+    plt.imshow(image, cmap='jet')#, vmin=0.0, vmax=1.0)
+    plt.axis('off')
+    '''if colorbar:
+        plt.colorbar()'''
+    #plt.show()
+
 def plot_results(path, method):
     infos = (os.path.normpath(path)).split(os.sep)
     dataset = infos[-3]

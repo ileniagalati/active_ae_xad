@@ -1,15 +1,18 @@
+import argparse
 import tkinter as tk
 from tkinter import *
 from tkinter import filedialog
 from tkinter import ttk #install python-tk@3.10
 from PIL import Image, ImageTk #install Pillow
 import numpy as np
+from functools import partial
 from PIL import ImageDraw
 
 class Mask_Generator(ttk.Frame):
-        def __init__(self, mainframe, path):
+        def __init__(self, mainframe, path, to_path):
             ''' Inizializzo il frame principale '''
             ttk.Frame.__init__(self, master=mainframe)
+            self.default_path=to_path
             self.master.title('Mask Generator')
             # Creo canvas ci inserisco l'immagine
             self.canvas = tk.Canvas(self.master, highlightthickness=0)
@@ -233,7 +236,8 @@ class Mask_Generator(ttk.Frame):
                 lista_interni=self.punti_dentro_poligono(poligono)
                 for coppia in lista_interni:
                     mask[coppia[1],coppia[0]]=1
-            mask_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png")])
+
+            mask_path=self.default_path #filedialog.asksaveasfilename(initialfile=to_path,defaultextension=".png",filetypes=[("PNG files", "*.png")])
             if mask_path:
                 Image.fromarray(mask * 255).save(mask_path)
 
@@ -383,12 +387,23 @@ class Mask_Generator(ttk.Frame):
                 self.canvas.imagetk = imagetk  # mi tengo un ulteriore riferimento per evitare eliminazione dal garbage collector
             self.master.focus_force()#metto in primo piano la finestra
 
-if __name__ == "__main__":
-    percorso_foto = filedialog.askopenfilename()
-    root= tk.Tk()
-    #print(percorso_foto)
-    app = Mask_Generator(root, path=percorso_foto)
-    root.mainloop()
 
+if __name__ == "__main__":
+    # Parser degli argomenti
+    parser = argparse.ArgumentParser(description="Mask Generation")
+
+    # Definisci gli argomenti. In questo caso, 'path' è un argomento obbligatorio.
+    parser.add_argument('-from_path', type=str, help="the image from", required=True)
+    parser.add_argument('-to_path', type=str, help="save the image to", required=True)
+    args = parser.parse_args()
+
+    # Usa il percorso fornito come argomento
+    percorso_foto = args.from_path
+    to_path=args.to_path
+
+    # Avvia la GUI
+    root = tk.Tk()
+    app = Mask_Generator(root, path=percorso_foto,to_path=to_path)
+    root.mainloop()
 
 
