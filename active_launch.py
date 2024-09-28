@@ -25,7 +25,7 @@ from tkinter import ttk #install python-tk@3.10
 from PIL import Image, ImageTk #install Pillow
 import numpy as np
 from PIL import ImageDraw
-from aexad.tools.utils import plot_image_tosave
+from aexad.tools.utils import plot_image_tosave, plot_heatmap_tosave
 
 def f(x):
     return 1-x
@@ -100,14 +100,12 @@ if __name__ == '__main__':
         scores_aexad_conv = np.load(open(os.path.join(path, 'aexad_scores.npy'), 'rb'))
 
         idx = np.argsort(scores_aexad_conv[Y_test == 1])[::-1]
-        htmaps_f = gaussian_blur2d(torch.from_numpy(htmaps_aexad_conv), kernel_size=(7, 7),sigma=(2, 2))
-
         img="a"
         ext=".png"
+        #query selection per il momento prendo un'immagine casuale
 
-        #query selection per il momento prendo l'immagine con il deviation score più alto
         plot_image_tosave(X_train[Y_train==1][idx[1]])
-        plt.savefig(os.path.join(active_images,img+ext))
+        plt.savefig(os.path.join(active_images,img+ext), bbox_inches='tight', pad_inches=0)
 
         mask_images=os.path.join("mask_results",str(args.ds),"class_"+str(args.c))
         if not os.path.exists(mask_images):
@@ -115,9 +113,13 @@ if __name__ == '__main__':
 
         from_path=os.path.join(active_images,img+ext)
         to_path=os.path.join(mask_images,img+"_mask"+ext)
-        #if not os.path.exists(to_path):
-         #   os.makedirs(to_path)
+
         run_mask_generation(from_path,to_path)
         print("finished iteration")
+
+        image = np.array(Image.open(from_path).convert('RGB').resize(28,28))
+        gt_image= np.array(Image.open(to_path).convert('RGB').resize(28,28))
+        #X_train.append(image)
+        #GT_train.append(np.zeros_like(image, dtype=np.uint8))
 
     shutil.rmtree(data_path)

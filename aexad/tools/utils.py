@@ -55,15 +55,16 @@ def plot_image_tosave(image, cmap='gray'):
     :param image: (C x H x W) channel-first-format image
     :return:
     '''
-    if image.shape[0] == 1:
-        image = image[0, :, :]
-    else:
-        image = np.swapaxes(image, 0, 1)
-        image = np.swapaxes(image, 1, 2)
+    image = image[0, :, :]
+    #if image.shape[0] == 1:
+     #   image = image[0, :, :]
+    #else:
+     #   image = np.swapaxes(image, 0, 1)
+      #  image = np.swapaxes(image, 1, 2)
 
     plt.imshow(image, cmap=cmap)
     plt.axis('off')
-# plt.show()
+    #plt.show()
 
 
 def plot_heatmap_tosave(image, colorbar=True):
