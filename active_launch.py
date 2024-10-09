@@ -16,7 +16,7 @@ import torch
 from kornia.filters import gaussian_blur2d
 
 from aexad.tools.create_dataset import square
-from aexad.aexad_script import launch as launch_aexad
+from aexad.aexad_script import launch_aexad
 import MaskGenerator
 import tkinter as tk
 from tkinter import *
@@ -102,7 +102,7 @@ if __name__ == '__main__':
         idx = np.argsort(scores_aexad_conv[Y_test == 1])[::-1]
         img="a"
         ext=".png"
-        #query selection per il momento prendo un'immagine casuale
+        #query selection
 
         plot_image_tosave(X_train[Y_train==1][idx[1]])
         plt.savefig(os.path.join(active_images,img+ext), bbox_inches='tight', pad_inches=0)
@@ -117,8 +117,8 @@ if __name__ == '__main__':
         run_mask_generation(from_path,to_path)
         print("finished iteration")
 
-        image = np.array(Image.open(from_path).convert('RGB').resize(28,28))
-        gt_image= np.array(Image.open(to_path).convert('RGB').resize(28,28))
+        #image = np.array(Image.open(from_path).convert('RGB').resize(28,28))
+        #gt_image= np.array(Image.open(to_path).convert('RGB').resize(28,28))
         #X_train.append(image)
         #GT_train.append(np.zeros_like(image, dtype=np.uint8))
 
