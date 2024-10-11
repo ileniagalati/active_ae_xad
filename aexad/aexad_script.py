@@ -11,15 +11,17 @@ from torchsummary import summary
 from aexad.AE_architectures import Shallow_Autoencoder, Deep_Autoencoder, Conv_Autoencoder, PCA_Autoencoder, Conv_Deep_Autoencoder, Conv_Autoencoder_f2
 from aexad.dataset import CustomAD
 from aexad.loss import AEXAD_loss
+from aaexad_loss import AAEXAD_loss
 
 from scipy.ndimage import gaussian_filter
 
 from aexad.mvtec_dataset import MvtecAD
+from brain_dataset import BrainDataset
 
 
 class Trainer:
     def __init__(self, latent_dim, lambda_p, lambda_s, f, path, AE_type, batch_size=None, silent=False, use_cuda=True,
-                 loss='aexad', save_intermediate=False, dataset='mnist'):
+                 loss='aaexad', save_intermediate=False, dataset='mnist'):
         '''
         :param latent_dim:
         :param lambda_p: anomalous pixel weight
@@ -36,9 +38,12 @@ class Trainer:
         if dataset == 'mnist' or dataset == 'fmnist':
             self.train_loader = DataLoader(CustomAD(path, train=True), batch_size=batch_size, shuffle=True)
             self.test_loader = DataLoader(CustomAD(path, train=False), batch_size=batch_size, shuffle=False)
-        else:
+        if dataset == 'mvtec':
             self.train_loader = DataLoader(MvtecAD(path, train=True), batch_size=batch_size, shuffle=True)
             self.test_loader = DataLoader(MvtecAD(path, train=False), batch_size=batch_size, shuffle=False)
+        if dataset == 'brain':
+            self.train_loader = DataLoader(BrainDataset(path, train=True), batch_size=batch_size, shuffle=True)
+            self.test_loader = DataLoader(BrainDataset(path, train=False), batch_size=batch_size, shuffle=False)
 
         self.save_intermediate = save_intermediate
 
@@ -73,6 +78,8 @@ class Trainer:
         self.optimizer = torch.optim.Adam(self.model.parameters())
         if loss == 'aexad':
             self.criterion = AEXAD_loss(lambda_p, lambda_s, f, self.cuda)
+        if loss == 'aaexad':
+            self.criterion = AAEXAD_loss(lambda_p, lambda_s, f, self.cuda)
         elif loss == 'mse':
             self.criterion = nn.MSELoss()
 
@@ -178,12 +185,12 @@ if __name__ == '__main__':
     #dataset = info[-2]
     #seed = info[-1]
 
-    data_path = 'datasets/mvtec'
+    data_path = 'brain_dataset'
 
     start = time()
 
     trainer = Trainer(32, None, None, f, data_path,
-                      'conv_deep', 4, dataset='mvtec')
+                      'conv_deep', 4, dataset='brain_dataset')
     #summary(trainer.model, (3, 900, 900))
     trainer.train(1000)
     print('TIME ELAPSED: ', time()-start)

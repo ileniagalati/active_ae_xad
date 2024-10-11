@@ -1,7 +1,9 @@
 import os
 
 import PIL.Image as Image
-from tensorflow.keras.datasets import mnist,fashion_mnist,cifar10
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.datasets import fashion_mnist
+from tensorflow.keras.datasets import cifar10
 import numpy as np
 
 def square(dig,perc_anom_train = 0.2,perc_anom_test = 0.2,size = 5,intensity = 'rand',DATASET = 'mnist', seed=None):
@@ -301,7 +303,6 @@ def mvtec(cl, path, n_anom_per_cls, seed=None):
     #GT_test = np.swapaxes(GT_test, 2, 3)
     #GT_test = np.swapaxes(GT_test, 1, 2)
 
-
     Y_train = np.zeros(X_train.shape[0])
     Y_train[len(normal_files_tr): ] = 1
     Y_test = np.zeros(X_test.shape[0])
@@ -311,3 +312,54 @@ def mvtec(cl, path, n_anom_per_cls, seed=None):
     print(Y_test.sum())
 
     return X_train, Y_train, X_test, Y_test, GT_train, GT_test
+
+import os
+import numpy as np
+from PIL import Image
+
+def load_brain_dataset(path, img_size=(256, 256), seed=None):
+    np.random.seed(seed=seed)
+
+    # Percorsi per le immagini di training e test
+    train_img_path = os.path.join(path, 'train', 'img')
+    test_img_path = os.path.join(path, 'test', 'img')
+
+    X_train = []
+    X_test = []
+    GT_train = []  # Inizializza le ground truth come una lista vuota
+    GT_test = []   # Anche per il test set
+
+    # Caricamento immagini dal set di train
+    train_files = os.listdir(train_img_path)
+    for file in train_files:
+        if file.endswith(('png', 'PNG', 'jpg', 'jpeg', 'npy')):
+            image = Image.open(os.path.join(train_img_path, file)).convert('RGB')
+            image = image.resize(img_size)
+            X_train.append(np.array(image))
+            GT_train.append(np.zeros(np.array(image).shape[:2], dtype=np.uint8))
+
+    # Caricamento immagini dal set di test
+    test_files = os.listdir(test_img_path)
+    for file in test_files:
+        if file.endswith(('png', 'PNG', 'jpg', 'jpeg', 'npy')):
+            image = Image.open(os.path.join(test_img_path, file)).convert('RGB')
+            image = image.resize(img_size)
+            X_test.append(np.array(image))
+            GT_test.append(np.zeros(np.array(image).shape[:2], dtype=np.uint8))
+
+    # Converti liste in array numpy
+    X_train = np.array(X_train).astype(np.uint8)
+    X_test = np.array(X_test).astype(np.uint8)
+
+    # Placeholder per Y_train e Y_test in un contesto non supervisionato
+    Y_train = np.zeros(X_train.shape[0])  # Placeholder
+    Y_test = np.zeros(X_test.shape[0])    # Placeholder
+
+    print('X_train shape:', X_train.shape)
+    print('X_test shape:', X_test.shape)
+    print('Number of train samples:', len(X_train))
+    print('Number of test samples:', len(X_test))
+
+    return X_train, Y_train, X_test, Y_test, GT_train, GT_test
+
+
