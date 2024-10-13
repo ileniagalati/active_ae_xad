@@ -11,7 +11,6 @@ from torchsummary import summary
 from aexad.AE_architectures import Shallow_Autoencoder, Deep_Autoencoder, Conv_Autoencoder, PCA_Autoencoder, Conv_Deep_Autoencoder, Conv_Autoencoder_f2
 from aexad.dataset import CustomAD
 from aexad.loss import AEXAD_loss
-from aaexad_loss import AAEXAD_loss
 
 from scipy.ndimage import gaussian_filter
 

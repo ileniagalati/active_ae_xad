@@ -1,10 +1,10 @@
 import os
-
+import numpy as np
+from PIL import Image
 import PIL.Image as Image
 from tensorflow.keras.datasets import mnist
 from tensorflow.keras.datasets import fashion_mnist
 from tensorflow.keras.datasets import cifar10
-import numpy as np
 
 def square(dig,perc_anom_train = 0.2,perc_anom_test = 0.2,size = 5,intensity = 'rand',DATASET = 'mnist', seed=None):
     '''
@@ -313,15 +313,12 @@ def mvtec(cl, path, n_anom_per_cls, seed=None):
 
     return X_train, Y_train, X_test, Y_test, GT_train, GT_test
 
-import os
-import numpy as np
-from PIL import Image
 
 def load_brain_dataset(path, img_size=(256, 256), seed=None):
     np.random.seed(seed=seed)
 
     train_img_path = os.path.join(path, 'train', 'img')
-    test_img_path = os.path.join(path, 'test', 'img')
+    test_img_path = os.path.join(path, 'train', 'img')
 
     X_train = []
     X_test = []
