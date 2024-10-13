@@ -320,21 +320,20 @@ from PIL import Image
 def load_brain_dataset(path, img_size=(256, 256), seed=None):
     np.random.seed(seed=seed)
 
-    # Percorsi per le immagini di training e test
     train_img_path = os.path.join(path, 'train', 'img')
     test_img_path = os.path.join(path, 'test', 'img')
 
     X_train = []
     X_test = []
-    GT_train = []  # Inizializza le ground truth come una lista vuota
-    GT_test = []   # Anche per il test set
+    GT_train = []
+    GT_test = []
 
     # Caricamento immagini dal set di train
     train_files = os.listdir(train_img_path)
     for file in train_files:
         if file.endswith(('png', 'PNG', 'jpg', 'jpeg', 'npy')):
             image = Image.open(os.path.join(train_img_path, file)).convert('RGB')
-            image = image.resize(img_size)
+            #image = image.resize(img_size)
             X_train.append(np.array(image))
             GT_train.append(np.zeros(np.array(image).shape[:2], dtype=np.uint8))
 
@@ -343,7 +342,7 @@ def load_brain_dataset(path, img_size=(256, 256), seed=None):
     for file in test_files:
         if file.endswith(('png', 'PNG', 'jpg', 'jpeg', 'npy')):
             image = Image.open(os.path.join(test_img_path, file)).convert('RGB')
-            image = image.resize(img_size)
+            #image = image.resize(img_size)
             X_test.append(np.array(image))
             GT_test.append(np.zeros(np.array(image).shape[:2], dtype=np.uint8))
 
@@ -359,6 +358,9 @@ def load_brain_dataset(path, img_size=(256, 256), seed=None):
     print('X_test shape:', X_test.shape)
     print('Number of train samples:', len(X_train))
     print('Number of test samples:', len(X_test))
+
+    print('Y_train shape:', Y_train.shape)
+    print('Y_test shape:', Y_test.shape)
 
     return X_train, Y_train, X_test, Y_test, GT_train, GT_test
 

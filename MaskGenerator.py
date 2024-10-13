@@ -192,6 +192,7 @@ class Mask_Generator(ttk.Frame):
         def genera_mask(self):
             # Inizializzo una matrice numpy con tutti gli elementi impostati su 0 (tutto nero)
             mask = np.zeros((self.height, self.width), dtype=np.uint8)
+            print('mask size',mask.size)
             for shape,x1,y1,x2,y2,_,_ in self.coord_disegni:
                 if shape=="cerchio":
                     centro_x=int((x1+x2)/2)

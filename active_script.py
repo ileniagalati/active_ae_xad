@@ -2,37 +2,22 @@ import argparse
 import os
 import shutil
 import pickle
-import tkinter as tk
-from tkinter import *
-from tkinter import filedialog
-from tkinter import ttk #install python-tk@3.10
-from PIL import Image, ImageTk #install Pillow
-import numpy as np
-from PIL import ImageDraw
 import matplotlib.pyplot as plt
 import subprocess
-import numpy as np
 import torch
-from kornia.filters import gaussian_blur2d
+from PIL import Image
 
 from aexad.tools.create_dataset import load_brain_dataset
 from aexad.aexad_script import launch as launch_aexad
-import MaskGenerator
-import tkinter as tk
-from tkinter import *
-from tkinter import filedialog
-from tkinter import ttk #install python-tk@3.10
-from PIL import Image, ImageTk #install Pillow
 import numpy as np
-from PIL import ImageDraw
 from aexad.tools.utils import plot_image_tosave, plot_heatmap_tosave
 
 def f(x):
     return 1-x
 
 def training_active_aexad(data_path,epochs,dataset):
-    heatmaps, scores, _, _, tot_time = launch_aexad(data_path, epochs, 16, 32, (28*28) / 25, None, f, 'conv',
-                                                    save_intermediate=True, save_path=ret_path,dataset=dataset)
+    heatmaps, scores, _, _, tot_time = launch_aexad(data_path, epochs, 16, 32, (256*256) / 25, None, f, 'conv',
+                                                    save_intermediate=True, save_path=ret_path,dataset=dataset,loss='mse')
     np.save(open(os.path.join(ret_path, 'aexad_htmaps.npy'), 'wb'), heatmaps)
     np.save(open(os.path.join(ret_path, 'aexad_scores.npy'), 'wb'), scores)
     times.append(tot_time)
@@ -90,20 +75,32 @@ if __name__ == '__main__':
 
         htmaps_aexad_conv = np.load(open(os.path.join(path, 'aexad_htmaps.npy'), 'rb'))
         scores_aexad_conv = np.load(open(os.path.join(path, 'aexad_scores.npy'), 'rb'))
+        print(scores_aexad_conv)
 
-        idx = np.argsort(scores_aexad_conv[Y_test == 1])[::-1]
+        idx = np.argsort(scores_aexad_conv)[::-1]
+        print(scores_aexad_conv[idx==0])
+        print(scores_aexad_conv[idx==31])
         img="a"
         ext=".png"
         #query selection
 
-        print(X_train.size,'xtrain')
-        print(Y_train.size,'ytrain')
-        print(X_test.size,'xtest')
-        print(Y_test.size,'ytest')
+        print(X_train.shape,'xtrain')
+        print(Y_train.shape,'ytrain')
+        print(X_test.shape,'xtest')
+        print(Y_test.shape,'ytest')
+        #print('image',X_train[idx[0]].shape)
+        image_to_save = X_train[idx[0]]
+        print("Dimensione dell'immagine da salvare:", image_to_save.shape)  # Dovrebbe stampare (256, 256, 3)
 
-        plot_image_tosave(X_train[Y_train==1][idx[1]])
-        plt.savefig(os.path.join(active_images,img+ext), bbox_inches='tight', pad_inches=0)
+        # Salva l'immagine usando PIL
+        img_to_save = Image.fromarray(image_to_save.astype(np.uint8))  # Assicurati che sia uint8
+        img_to_save.save(os.path.join(active_images, 'image_name.png'))  # Modifica img e ext come necessario
 
+        print("Immagine salvata con successo!")
+        '''
+        plot_image_tosave(X_train[idx[0]])
+        plt.savefig(os.path.join(active_images,img+ext))
+        '''
         mask_images=os.path.join("mask_results",str(args.ds),str(args.s),str(b))
         if not os.path.exists(mask_images):
             os.makedirs(mask_images)

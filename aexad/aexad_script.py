@@ -18,10 +18,10 @@ from scipy.ndimage import gaussian_filter
 from aexad.mvtec_dataset import MvtecAD
 from brain_dataset import BrainDataset
 
-
+#TODO: IMPORTANTE! Quando cambi loss, decommenta(o riformula) riga 143 self.criterion
 class Trainer:
     def __init__(self, latent_dim, lambda_p, lambda_s, f, path, AE_type, batch_size=None, silent=False, use_cuda=True,
-                 loss='aaexad', save_intermediate=False, dataset='mnist'):
+                 loss='aexad', save_intermediate=False, dataset='mnist'):
         '''
         :param latent_dim:
         :param lambda_p: anomalous pixel weight
@@ -78,8 +78,6 @@ class Trainer:
         self.optimizer = torch.optim.Adam(self.model.parameters())
         if loss == 'aexad':
             self.criterion = AEXAD_loss(lambda_p, lambda_s, f, self.cuda)
-        if loss == 'aaexad':
-            self.criterion = AAEXAD_loss(lambda_p, lambda_s, f, self.cuda)
         elif loss == 'mse':
             self.criterion = nn.MSELoss()
 
@@ -142,7 +140,7 @@ class Trainer:
                     gt_label = gt_label.cuda()
                     label = label.cuda()
                 output = self.model(image)
-                loss = self.criterion(output, image, gt_label, label)
+                loss = self.criterion(output, image)#, gt_label, label)
                 self.optimizer.zero_grad()
                 loss.backward()
 
@@ -185,7 +183,7 @@ if __name__ == '__main__':
     #dataset = info[-2]
     #seed = info[-1]
 
-    data_path = 'brain_dataset'
+    data_path = 'mvtec'
 
     start = time()
 

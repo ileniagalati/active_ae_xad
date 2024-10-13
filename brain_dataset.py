@@ -13,25 +13,21 @@ class BrainDataset(Dataset):
         self.img_size = img_size
         self.dim = (3, img_size[0], img_size[1])
 
-        # Trasformazioni da applicare alle immagini
         self.transform = transforms.Compose([
             transforms.ToPILImage(),
-            transforms.Resize((self.img_size[0], self.img_size[1]), Image.NEAREST),
+            transforms.Resize((self.dim[-2], self.dim[-1]), Image.NEAREST),
             transforms.PILToTensor(),
         ])
 
-        # Percorso delle immagini di training e test
         if self.train:
             split = 'train'
         else:
             split = 'test'
 
-        x = np.load(os.path.join(path, f'X_{split}.npy'))  # / 255.0)[:,:,:,0]
+        x = np.load(os.path.join(path, f'X_{split}.npy'))
         y = np.load(os.path.join(path, f'Y_{split}.npy'))
         gt = np.load(os.path.join(path, f'GT_{split}.npy'), allow_pickle=True)
 
-        # normal_data = x[y == 0]
-        # outlier_data = x[y == 1]
 
         self.gt = gt
         self.labels = y
