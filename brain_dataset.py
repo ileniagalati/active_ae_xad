@@ -20,14 +20,25 @@ class BrainDataset(Dataset):
         ])
 
         if self.train:
-            split = 'train'
+            x = np.load(os.path.join(path, f'X_0.npy'))
+            x1 = np.load(os.path.join(path, 'X_no.npy'))
+            x2 = np.load(os.path.join(path, 'X_an.npy'))
+            if x.ndim == x1.ndim == x2.ndim:
+                x = np.concatenate((x, x1, x2), axis=0)
+
+            y = np.load(os.path.join(path, f'Y_no.npy'))
+            y1 = np.load(os.path.join(path, 'Y_an.npy'))
+            if y.ndim == y1.ndim:
+                y = np.concatenate((y,y1), axis=0)
+
+            gt = np.load(os.path.join(path, f'GT_no.npy'))
+            gt1= np.load(os.path.join(path, f'GT_an.npy'))
+            if gt.ndim == gt1.ndim:
+                gt=np.concatenate((gt,gt1), axis=0)
         else:
-            split = 'test'
-
-        x = np.load(os.path.join(path, f'X_{split}.npy'))
-        y = np.load(os.path.join(path, f'Y_{split}.npy'))
-        gt = np.load(os.path.join(path, f'GT_{split}.npy'), allow_pickle=True)
-
+            x = np.load(os.path.join(path, f'X_test.npy'))
+            y = np.load(os.path.join(path, f'Y_test.npy'))
+            gt = np.load(os.path.join(path, f'GT_test.npy'), allow_pickle=True)
 
         self.gt = gt
         self.labels = y

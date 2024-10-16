@@ -8,7 +8,7 @@ import torch
 from PIL import Image
 
 from aexad.tools.create_dataset import load_brainMRI_dataset
-from aexad.aexad_script import launch as launch_aexad
+from active_aexad_script import launch as launch_aexad
 import numpy as np
 from aexad.tools.utils import plot_image_tosave, plot_heatmap_tosave
 
@@ -34,6 +34,29 @@ def update_ground_truth_with_mask(image_idx, mask_path, GT_train, gt_save_path):
     GT_train[image_idx] = mask_array
     np.save(gt_save_path, GT_train)
 
+def is_image_empty(image_path):
+    mask_img = Image.open(image_path)
+    mask_array = np.array(mask_img)
+    return np.all(mask_array == 0)
+
+def update_datasets(image_idx, mask_array, X_0, X_an, X_no, Y_an, Y_no, GT_an, GT_no):
+    if np.sum(mask_array) > 0:  # Mask is not empty (abnormal case)
+        # Move to abnormal dataset
+        X_an.append(X_0[image_idx])
+        Y_an.append(1)  # Append corresponding label
+        GT_an.append(mask_array)  # Append corresponding ground truth
+    else:  # Mask is empty (normal case)
+        # Move to normal dataset
+        X_no.append(X_0[image_idx])
+        Y_no.append(0)  # Append corresponding label
+        GT_no.append(mask_array)  # Append corresponding ground truth
+
+    # Remove from X_0
+    X_0 = np.delete(X_0, image_idx, axis=0)
+
+    return X_0, X_an, X_no, Y_an, Y_no, GT_an, GT_no
+
+
 if __name__ == '__main__':
     dataset_path= 'datasets/brainMRI'
 
@@ -46,18 +69,23 @@ if __name__ == '__main__':
     b=args.budget
 
     if args.ds == 'brain':
-        X_train, Y_train, X_test, Y_test, GT_train, GT_test = \
+        X_0, X_an, X_no, Y_an, Y_no , GT_an, GT_no, X_test, Y_test, GT_test = \
             load_brainMRI_dataset(dataset_path)
 
     data_path = os.path.join('results','test_data', str(args.ds))
     if not os.path.exists(data_path):
         os.makedirs(data_path)
 
-    np.save(open(os.path.join(data_path, 'X_train.npy'), 'wb'), X_train)
+    np.save(open(os.path.join(data_path, 'X_0.npy'), 'wb'), X_0)
+    np.save(open(os.path.join(data_path, 'X_an.npy'), 'wb'), X_an)
+    np.save(open(os.path.join(data_path, 'X_no.npy'), 'wb'), X_no)
+    np.save(open(os.path.join(data_path, 'Y_an.npy'), 'wb'), Y_an)
+    np.save(open(os.path.join(data_path, 'Y_no.npy'), 'wb'), Y_no)
+    np.save(open(os.path.join(data_path, 'GT_an.npy'), 'wb'), GT_an)
+    np.save(open(os.path.join(data_path, 'GT_no.npy'), 'wb'), GT_no)
+
     np.save(open(os.path.join(data_path, 'X_test.npy'), 'wb'), X_test)
-    np.save(open(os.path.join(data_path, 'Y_train.npy'), 'wb'), Y_train)
     np.save(open(os.path.join(data_path, 'Y_test.npy'), 'wb'), Y_test)
-    np.save(open(os.path.join(data_path, 'GT_train.npy'), 'wb'), GT_train)
     np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
     ret_path = os.path.join('results','output', str(args.ds))
     if not os.path.exists(ret_path):
@@ -85,9 +113,9 @@ if __name__ == '__main__':
         ext=".png"
 
         #query selection
-        image_to_save = X_train[idx[0]]
-        img_to_save = Image.fromarray(image_to_save.astype(np.uint8))  # Assicurati che sia uint8
-        img_to_save.save(os.path.join(active_images, img+ext))  # Modifica img e ext come necessario
+        image_to_save = X_0[idx[0]]
+        img_to_save = Image.fromarray(image_to_save.astype(np.uint8))
+        img_to_save.save(os.path.join(active_images, img+ext))
 
         mask_images=os.path.join('results',"mask",str(args.ds),str(x))
         if not os.path.exists(mask_images):
@@ -99,12 +127,41 @@ if __name__ == '__main__':
         #generazione della maschera
         run_mask_generation(from_path,to_path)
 
-        #aggiornamento della groud truth con la nuova maschera
-        image_idx = idx[0]
-        mask_path = to_path
-        gt_save_path = os.path.join(data_path, 'GT_train.npy')
+        #aggiornamento del dataset
+        mask_img = Image.open(to_path)
+        mask_array = np.array(mask_img)
 
-        GT_train = np.load(open(gt_save_path, 'rb'))
-        update_ground_truth_with_mask(image_idx, mask_path, GT_train, gt_save_path)
+        # Print lengths before updating datasets
+        print(f"Before update:")
+        print(f"Length of X_0: {len(X_0)}")
+        print(f"Length of X_an: {len(X_an)}")
+        print(f"Length of X_no: {len(X_no)}")
+        print(f"Length of Y_an: {len(Y_an)}")
+        print(f"Length of Y_no: {len(Y_no)}")
+        print(f"Length of GT_an: {len(GT_an)}")
+        print(f"Length of GT_no: {len(GT_no)}")
+
+        # Update datasets based on the mask
+        X_0, X_an, X_no, Y_an, Y_no, GT_an, GT_no =\
+            update_datasets( idx[0], mask_array, X_0, X_an, X_no, Y_an, Y_no, GT_an, GT_no)
+
+        # Print lengths after updating datasets
+        print(f"After update:")
+        print(f"Length of X_0: {len(X_0)}")
+        print(f"Length of X_an: {len(X_an)}")
+        print(f"Length of X_no: {len(X_no)}")
+        print(f"Length of Y_an: {len(Y_an)}")
+        print(f"Length of Y_no: {len(Y_no)}")
+        print(f"Length of GT_an: {len(GT_an)}")
+        print(f"Length of GT_no: {len(GT_no)}")
+
+        # Save the updated arrays
+        np.save(open(os.path.join(data_path, 'X_0.npy'), 'wb'), X_0)
+        np.save(open(os.path.join(data_path, 'X_an.npy'), 'wb'), np.array(X_an))
+        np.save(open(os.path.join(data_path, 'X_no.npy'), 'wb'), np.array(X_no))
+        np.save(open(os.path.join(data_path, 'Y_an.npy'), 'wb'), np.array(Y_an))
+        np.save(open(os.path.join(data_path, 'Y_no.npy'), 'wb'), np.array(Y_no))
+        np.save(open(os.path.join(data_path, 'GT_an.npy'), 'wb'), np.array(GT_an))
+        np.save(open(os.path.join(data_path, 'GT_no.npy'), 'wb'), np.array(GT_no))
 
    # shutil.rmtree(data_path)
