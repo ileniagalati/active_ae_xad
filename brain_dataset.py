@@ -39,11 +39,11 @@ class BrainDataset(Dataset):
 
     def __getitem__(self, index):
         image = self.images[index]
-        image_label = self.gt[index]  # Ground truth vuota
+        image_label = self.gt[index]
 
         sample = {
-            'image': self.transform(image) / 255.0,  # Normalizza l'immagine
-            'label': 0,  # Placeholder per le etichette
-            'gt_label': self.transform(image_label) / 255.0  # Ground truth vuota
+            'image': self.transform(image) / 255.0,
+            'label': 0,
+            'gt_label': self.transform(image_label) / 255.0
         }
         return sample

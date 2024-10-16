@@ -7,7 +7,7 @@ import subprocess
 import torch
 from PIL import Image
 
-from aexad.tools.create_dataset import load_brain_dataset
+from aexad.tools.create_dataset import load_brainMRI_dataset
 from aexad.aexad_script import launch as launch_aexad
 import numpy as np
 from aexad.tools.utils import plot_image_tosave, plot_heatmap_tosave
@@ -35,7 +35,7 @@ def update_ground_truth_with_mask(image_idx, mask_path, GT_train, gt_save_path):
     np.save(gt_save_path, GT_train)
 
 if __name__ == '__main__':
-    dataset_path='brain_dataset'
+    dataset_path= 'datasets/brainMRI'
 
     print(torch.cuda.is_available())
 
@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     if args.ds == 'brain':
         X_train, Y_train, X_test, Y_test, GT_train, GT_test = \
-            load_brain_dataset(dataset_path)
+            load_brainMRI_dataset(dataset_path)
 
     data_path = os.path.join('results','test_data', str(args.ds))
     if not os.path.exists(data_path):
@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
         heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=1,dataset=str(args.ds))
 
-        active_images=os.path.join('results',"active_results",str(args.ds),str(x))
+        active_images=os.path.join('results',"query",str(args.ds),str(x))
         if not os.path.exists(active_images):
             os.makedirs(active_images)
 
@@ -85,20 +85,21 @@ if __name__ == '__main__':
         ext=".png"
 
         #query selection
-
         image_to_save = X_train[idx[0]]
         img_to_save = Image.fromarray(image_to_save.astype(np.uint8))  # Assicurati che sia uint8
         img_to_save.save(os.path.join(active_images, img+ext))  # Modifica img e ext come necessario
 
-        mask_images=os.path.join('results',"mask_results",str(args.ds),str(x))
+        mask_images=os.path.join('results',"mask",str(args.ds),str(x))
         if not os.path.exists(mask_images):
             os.makedirs(mask_images)
 
         from_path=os.path.join(active_images,img+ext)
         to_path=os.path.join(mask_images,img+"_mask"+ext)
 
+        #generazione della maschera
         run_mask_generation(from_path,to_path)
 
+        #aggiornamento della groud truth con la nuova maschera
         image_idx = idx[0]
         mask_path = to_path
         gt_save_path = os.path.join(data_path, 'GT_train.npy')
@@ -106,4 +107,4 @@ if __name__ == '__main__':
         GT_train = np.load(open(gt_save_path, 'rb'))
         update_ground_truth_with_mask(image_idx, mask_path, GT_train, gt_save_path)
 
-    shutil.rmtree(data_path)
+   # shutil.rmtree(data_path)

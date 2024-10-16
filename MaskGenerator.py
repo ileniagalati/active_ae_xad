@@ -241,10 +241,12 @@ class Mask_Generator(ttk.Frame):
             mask_path=self.default_path #filedialog.asksaveasfilename(initialfile=to_path,defaultextension=".png",filetypes=[("PNG files", "*.png")])
             if mask_path:
                 Image.fromarray(mask * 255).save(mask_path)
+                '''
                 root = tk.Tk()
                 root.withdraw()  # Nasconde la finestra principale
                 messagebox.showinfo("Salvataggio completato", f"L'immagine è stata salvata correttamente in:\n{mask_path}")
                 root.destroy()  # Chiudi la finestra di avviso
+                '''
 
 
         def e_dentro_poligono(self,x, y, poly):
