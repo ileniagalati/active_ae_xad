@@ -50,11 +50,19 @@ class BrainDataset(Dataset):
 
     def __getitem__(self, index):
         image = self.images[index]
-        image_label = self.gt[index]
+        if ( len(self.gt) >=1 ):
+            image_label = self.gt[index]
+            image = self.transform(image) / 255.0
+            label = 0
+            gt_label = self.transform(image_label) / 255.0
+        else:
+            image = self.transform(image) / 255.0
+            label=None
+            gt_label = None
 
         sample = {
-            'image': self.transform(image) / 255.0,
-            'label': 0,
-            'gt_label': self.transform(image_label) / 255.0
+            'image': image,
+            'label': label,
+            'gt_label': gt_label
         }
         return sample

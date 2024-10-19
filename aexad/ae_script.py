@@ -10,7 +10,7 @@ from torchsummary import summary
 
 from AE_architectures import Shallow_Autoencoder, Deep_Autoencoder, Conv_Autoencoder, PCA_Autoencoder
 from dataset import CustomAD, CustomAD_AE
-from loss import AEXAD_loss
+from active_loss import AEXAD_loss
 
 from scipy.ndimage import gaussian_filter
 

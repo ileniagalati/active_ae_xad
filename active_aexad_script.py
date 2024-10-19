@@ -11,6 +11,7 @@ from torchsummary import summary
 from aexad.AE_architectures import Shallow_Autoencoder, Deep_Autoencoder, Conv_Autoencoder, PCA_Autoencoder, Conv_Deep_Autoencoder, Conv_Autoencoder_f2
 from aexad.dataset import CustomAD
 from aexad.loss import AEXAD_loss
+from active_loss import AAEXAD_loss
 
 from scipy.ndimage import gaussian_filter
 
@@ -76,6 +77,8 @@ class Trainer:
         self.optimizer = torch.optim.Adam(self.model.parameters())
         if loss == 'aexad':
             self.criterion = AEXAD_loss(lambda_p, lambda_s, f, self.cuda)
+        if loss == 'aaexad':
+            self.criterion = AAEXAD_loss(lambda_p, lambda_s, f, self.cuda)
         elif loss == 'mse':
             self.criterion = nn.MSELoss()
 
@@ -95,7 +98,12 @@ class Trainer:
         gtmaps = []
         labels = []
         for i, sample in enumerate(tbar):
-            image, label, gtmap = sample['image'], sample['label'], sample['gt_label']
+            image= sample['image']
+            #if (sample['label']!= None):
+            label = sample['label']
+            #if (sample['gt_label'] != None):
+            gtmap = sample['gt_label']
+
             # TODO ricontrollare
             if self.cuda:
                 image = image.cuda()
@@ -109,8 +117,8 @@ class Trainer:
             labels.extend(label.detach().numpy())
         scores = np.array(scores)
         heatmaps = np.array(heatmaps)
-        gtmaps = np.array(gtmaps)
-        labels = np.array(labels)
+        #gtmaps = np.array(gtmaps)
+        #labels = np.array(labels)
         return heatmaps, scores, gtmaps, labels
 
 
@@ -131,12 +139,19 @@ class Trainer:
             train_loss = 0.0
             tbar = tqdm(self.train_loader, disable=self.silent)
             for i, sample in enumerate(tbar):
-                image, label, gt_label = sample['image'], sample['label'], sample['gt_label']
+
+                image= sample['image']
+                #if (sample['label']!= None):
+                label = sample['label']
+                #if (sample['gt_label'] != None):
+                gtmap = sample['gt_label']
 
                 if self.cuda:
                     image = image.cuda()
-                    gt_label = gt_label.cuda()
-                    label = label.cuda()
+                    if (gtmap!= None):
+                        gtmap = gtmap.cuda()
+                    if (label != None):
+                        label = label.cuda()
                 output = self.model(image)
                 loss = self.criterion(output, image)#, gt_label, label)
                 self.optimizer.zero_grad()

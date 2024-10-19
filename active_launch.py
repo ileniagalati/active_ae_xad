@@ -16,8 +16,8 @@ def f(x):
     return 1-x
 
 def training_active_aexad(data_path,epochs,dataset):
-    heatmaps, scores, _, _, tot_time = launch_aexad(data_path, epochs, 16, 32, (256*256) / 25, None, f, 'conv',
-                                                    save_intermediate=True, save_path=ret_path,dataset=dataset,loss='mse')
+    heatmaps, scores, _, _, tot_time = launch_aexad(data_path, epochs, 16, 32, (28*28) / 25, (28*28) / 25, f, 'conv',
+                                                    save_intermediate=True, save_path=ret_path,dataset=dataset,loss='aaexad')
     np.save(open(os.path.join(ret_path, 'aexad_htmaps.npy'), 'wb'), heatmaps)
     np.save(open(os.path.join(ret_path, 'aexad_scores.npy'), 'wb'), scores)
     times.append(tot_time)
@@ -40,18 +40,15 @@ def is_image_empty(image_path):
     return np.all(mask_array == 0)
 
 def update_datasets(image_idx, mask_array, X_0, X_an, X_no, Y_an, Y_no, GT_an, GT_no):
-    if np.sum(mask_array) > 0:  # Mask is not empty (abnormal case)
-        # Move to abnormal dataset
+    if np.sum(mask_array) > 0:
         X_an.append(X_0[image_idx])
-        Y_an.append(1)  # Append corresponding label
-        GT_an.append(mask_array)  # Append corresponding ground truth
-    else:  # Mask is empty (normal case)
-        # Move to normal dataset
+        Y_an[image_idx] = 1
+        GT_an[image_idx] = mask_array
+    else:
         X_no.append(X_0[image_idx])
-        Y_no.append(0)  # Append corresponding label
-        GT_no.append(mask_array)  # Append corresponding ground truth
+        Y_no[image_idx] = 0
+        GT_no[image_idx] = mask_array
 
-    # Remove from X_0
     X_0 = np.delete(X_0, image_idx, axis=0)
 
     return X_0, X_an, X_no, Y_an, Y_no, GT_an, GT_no

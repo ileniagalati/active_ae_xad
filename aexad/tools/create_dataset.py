@@ -328,8 +328,6 @@ def load_brainMRI_dataset(path, img_size=(256, 256), seed=None):
     GT_no =[]
     GT_test = []
 
-
-
     normal_files_tr = os.listdir(train_img_path)
     for file in normal_files_tr:
         if 'png' in file[-3:] or 'PNG' in file[-3:] or 'jpg' in file[-3:] or 'npy' in file[-3:]:
@@ -350,17 +348,9 @@ def load_brainMRI_dataset(path, img_size=(256, 256), seed=None):
     # Converti liste in array numpy
     X_0 = np.array(X_0).astype(np.uint8)
     X_test = np.array(X_test).astype(np.uint8)
-
-    #X_no = np.zeros(X_0.shape[0])
-    #X_an = np.zeros(X_0.shape[0])
-
-    Y_no = []#np.zeros(X_no.shape[0])
-    Y_an = []#np.zeros(X_an.shape[0])
+    Y_no = np.zeros(X_0.shape[0])
+    Y_an = np.zeros(X_0.shape[0])
     Y_test = np.zeros(X_test.shape[0])
-    #Y_train = np.zeros(X_0.shape[0])
-
-    #GT_train = np.zeros(X_train.shape[0])
-    #GT_test = np.zeros(X_test.shape[0])
     '''
     print('X_train shape:', X_train.shape)
     print('X_test shape:', X_test.shape)
