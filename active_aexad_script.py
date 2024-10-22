@@ -153,7 +153,7 @@ class Trainer:
                     if (label != None):
                         label = label.cuda()
                 output = self.model(image)
-                loss = self.criterion(output, image)#, gt_label, label)
+                loss = self.criterion(output, image, gtmap)
                 self.optimizer.zero_grad()
                 loss.backward()
 

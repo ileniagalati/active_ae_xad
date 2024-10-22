@@ -15,8 +15,8 @@ from aexad.tools.utils import plot_image_tosave, plot_heatmap_tosave
 def f(x):
     return 1-x
 
-def training_active_aexad(data_path,epochs,dataset):
-    heatmaps, scores, _, _, tot_time = launch_aexad(data_path, epochs, 16, 32, (28*28) / 25, (28*28) / 25, f, 'conv',
+def training_active_aexad(data_path,n_examples,epochs,dataset):
+    heatmaps, scores, _, _, tot_time = launch_aexad(data_path, epochs, 16, 32, lambda_p=(1/n_examples), lambda_s=0, f=f, AE_type='conv',
                                                     save_intermediate=True, save_path=ret_path,dataset=dataset,loss='aaexad')
     np.save(open(os.path.join(ret_path, 'aexad_htmaps.npy'), 'wb'), heatmaps)
     np.save(open(os.path.join(ret_path, 'aexad_scores.npy'), 'wb'), scores)
@@ -72,7 +72,8 @@ if __name__ == '__main__':
     data_path = os.path.join('results','test_data', str(args.ds))
     if not os.path.exists(data_path):
         os.makedirs(data_path)
-
+    n_examples=len(X_0)
+    print("numero di esempi: ",n_examples)
     np.save(open(os.path.join(data_path, 'X_0.npy'), 'wb'), X_0)
     np.save(open(os.path.join(data_path, 'X_an.npy'), 'wb'), X_an)
     np.save(open(os.path.join(data_path, 'X_no.npy'), 'wb'), X_no)
@@ -96,7 +97,7 @@ if __name__ == '__main__':
 
     for x in range(0, b):
 
-        heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=1,dataset=str(args.ds))
+        heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,n_examples,epochs=3,dataset=str(args.ds))
 
         active_images=os.path.join('results',"query",str(args.ds),str(x))
         if not os.path.exists(active_images):
