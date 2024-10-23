@@ -24,7 +24,7 @@ class BrainDataset(Dataset):
             x1 = np.load(os.path.join(path, 'X_no.npy'))
             x2 = np.load(os.path.join(path, 'X_an.npy'))
             if x.ndim == x1.ndim == x2.ndim:
-                x = np.concatenate((x, x1, x2), axis=0)
+                x = np.concatenate((x1, x2, x), axis=0)
 
             y = np.load(os.path.join(path, f'Y_no.npy'))
             y1 = np.load(os.path.join(path, 'Y_an.npy'))
@@ -50,6 +50,7 @@ class BrainDataset(Dataset):
 
     def __getitem__(self, index):
         image = self.images[index]
+
         if ( len(self.gt) >=1 ):
             image_label = self.gt[index]
             image = self.transform(image) / 255.0
@@ -57,8 +58,8 @@ class BrainDataset(Dataset):
             gt_label = self.transform(image_label) / 255.0
         else:
             image = self.transform(image) / 255.0
-            label=None
-            gt_label = None
+            label= -1
+            gt_label = -1
 
         sample = {
             'image': image,

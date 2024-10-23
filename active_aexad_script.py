@@ -99,9 +99,7 @@ class Trainer:
         labels = []
         for i, sample in enumerate(tbar):
             image= sample['image']
-            #if (sample['label']!= None):
             label = sample['label']
-            #if (sample['gt_label'] != None):
             gtmap = sample['gt_label']
 
             # TODO ricontrollare
@@ -139,21 +137,16 @@ class Trainer:
             train_loss = 0.0
             tbar = tqdm(self.train_loader, disable=self.silent)
             for i, sample in enumerate(tbar):
-
                 image= sample['image']
-                #if (sample['label']!= None):
                 label = sample['label']
-                #if (sample['gt_label'] != None):
                 gtmap = sample['gt_label']
 
                 if self.cuda:
                     image = image.cuda()
-                    if (gtmap!= None):
-                        gtmap = gtmap.cuda()
-                    if (label != None):
-                        label = label.cuda()
+                    gtmap = gtmap.cuda()
+                    label = label.cuda()
                 output = self.model(image)
-                loss = self.criterion(output, image, gtmap)
+                loss = self.criterion(output, image, gtmap, label)
                 self.optimizer.zero_grad()
                 loss.backward()
 
@@ -165,6 +158,7 @@ class Trainer:
 
             if self.save_intermediate and (epoch+1)%10 == 0:
                 torch.save(self.model.state_dict(), os.path.join(save_path, f'{name}_{epoch}.pt'))
+
 
     def save_weights(self, filename):
         torch.save(self.model.state_dict(), os.path.join(filename)) #args.experiment_dir, filename))

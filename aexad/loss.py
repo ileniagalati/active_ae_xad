@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import numpy as np
 
-
 class AEXAD_loss(nn.Module):
 
     def __init__(self, lambda_p, lambda_s, f, cuda):
@@ -15,10 +14,6 @@ class AEXAD_loss(nn.Module):
     def forward(self, input, target, gt, y):
         rec_n = (input - target) ** 2
         rec_o = (self.f(target) - input) ** 2
-
-        #print('GT: ', gt.shape)
-        #print('INPUT: ', input.shape)
-        #print('TARGET: ', target.shape)
 
         if self.lambda_p is None:
             lambda_p = torch.reshape(np.prod(gt.shape[1:]) / torch.sum(gt, dim=(1, 2, 3)), (-1, 1))
@@ -33,13 +28,6 @@ class AEXAD_loss(nn.Module):
             lambda_p = self.lambda_p
             if self.use_cuda:
                 lambda_p = lambda_p.cuda()
-
-        #print('GT*: ', gt.shape)
-        #print('INPUT*: ', input.shape)
-        #print('TARGET*: ', target.shape)
-
-        #print(gt.shape)
-        #print(rec_n.shape)
 
         loss_vec = (1 - gt) * rec_n + lambda_p * gt * rec_o
 

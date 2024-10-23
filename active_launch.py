@@ -28,26 +28,16 @@ def training_active_aexad(data_path,n_examples,epochs,dataset):
 def run_mask_generation(from_path,to_path):
     subprocess.run(["python3", "MaskGenerator.py" ,"-from_path",from_path,"-to_path",to_path])
 
-def update_ground_truth_with_mask(image_idx, mask_path, GT_train, gt_save_path):
-    mask_img = Image.open(mask_path)
-    mask_array = np.array(mask_img)
-    GT_train[image_idx] = mask_array
-    np.save(gt_save_path, GT_train)
-
-def is_image_empty(image_path):
-    mask_img = Image.open(image_path)
-    mask_array = np.array(mask_img)
-    return np.all(mask_array == 0)
-
 def update_datasets(image_idx, mask_array, X_0, X_an, X_no, Y_an, Y_no, GT_an, GT_no):
     if np.sum(mask_array) > 0:
         X_an.append(X_0[image_idx])
-        Y_an[image_idx] = 1
-        GT_an[image_idx] = mask_array
+        Y_an.append(0)
+        GT_an.append(mask_array)
     else:
         X_no.append(X_0[image_idx])
-        Y_no[image_idx] = 0
-        GT_no[image_idx] = mask_array
+        Y_no.append(0)
+        GT_no.append(mask_array)
+
 
     X_0 = np.delete(X_0, image_idx, axis=0)
 
@@ -72,8 +62,10 @@ if __name__ == '__main__':
     data_path = os.path.join('results','test_data', str(args.ds))
     if not os.path.exists(data_path):
         os.makedirs(data_path)
+
     n_examples=len(X_0)
     print("numero di esempi: ",n_examples)
+
     np.save(open(os.path.join(data_path, 'X_0.npy'), 'wb'), X_0)
     np.save(open(os.path.join(data_path, 'X_an.npy'), 'wb'), X_an)
     np.save(open(os.path.join(data_path, 'X_no.npy'), 'wb'), X_no)
@@ -129,7 +121,6 @@ if __name__ == '__main__':
         mask_img = Image.open(to_path)
         mask_array = np.array(mask_img)
 
-        # Print lengths before updating datasets
         print(f"Before update:")
         print(f"Length of X_0: {len(X_0)}")
         print(f"Length of X_an: {len(X_an)}")
@@ -140,7 +131,7 @@ if __name__ == '__main__':
         print(f"Length of GT_no: {len(GT_no)}")
 
         # Update datasets based on the mask
-        X_0, X_an, X_no, Y_an, Y_no, GT_an, GT_no =\
+        X_0, X_an, X_no, Y_an, Y_no, GT_an, GT_no = \
             update_datasets( idx[0], mask_array, X_0, X_an, X_no, Y_an, Y_no, GT_an, GT_no)
 
         # Print lengths after updating datasets

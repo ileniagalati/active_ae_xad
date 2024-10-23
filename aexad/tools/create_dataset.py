@@ -327,6 +327,8 @@ def load_brainMRI_dataset(path, img_size=(256, 256), seed=None):
     GT_an = []
     GT_no =[]
     GT_test = []
+    Y_an = []
+    Y_no = []
 
     normal_files_tr = os.listdir(train_img_path)
     for file in normal_files_tr:
@@ -334,8 +336,8 @@ def load_brainMRI_dataset(path, img_size=(256, 256), seed=None):
             image = Image.open(os.path.join(train_img_path, file)).convert('RGB')
             image = image.resize(img_size)
             X_0.append(np.array(image))
-            GT_an.append(np.zeros(np.array(image).shape[:2], dtype=np.uint8))
-            GT_no.append(np.zeros(np.array(image).shape[:2], dtype=np.uint8))
+            #GT_an.append(np.zeros(np.array(image).shape[:2], dtype=np.uint8))
+            #GT_no.append(np.zeros(np.array(image).shape[:2], dtype=np.uint8))
 
     normal_files_te = os.listdir(test_img_path)
     for file in normal_files_te:
@@ -345,19 +347,10 @@ def load_brainMRI_dataset(path, img_size=(256, 256), seed=None):
             X_test.append(np.array(image))
             GT_test.append(np.zeros(np.array(image).shape[:2], dtype=np.uint8))
 
-    # Converti liste in array numpy
     X_0 = np.array(X_0).astype(np.uint8)
     X_test = np.array(X_test).astype(np.uint8)
-    Y_no = np.zeros(X_0.shape[0])
-    Y_an = np.zeros(X_0.shape[0])
+    #Y_no = np.zeros(X_0.shape[0])
+    #Y_an = np.zeros(X_0.shape[0])
     Y_test = np.zeros(X_test.shape[0])
-    '''
-    print('X_train shape:', X_train.shape)
-    print('X_test shape:', X_test.shape)
-    print('Number of train samples:', len(X_train))
-    print('Number of test samples:', len(X_test))
 
-    print('Y_train shape:', Y_train.shape)
-    print('Y_test shape:', Y_test.shape)
-    '''
     return X_0, X_an, X_no, Y_an, Y_no , GT_an, GT_no, X_test, Y_test, GT_test
