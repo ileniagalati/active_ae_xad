@@ -139,7 +139,7 @@ class Trainer:
                     gt_label = gt_label.cuda()
                     label = label.cuda()
                 output = self.model(image)
-                loss = self.criterion(output, image)#, gt_label, label)
+                loss = self.criterion(output, image, gt_label, label)
                 self.optimizer.zero_grad()
                 loss.backward()
 

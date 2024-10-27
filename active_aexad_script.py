@@ -19,7 +19,7 @@ from aexad.mvtec_dataset import MvtecAD
 from brain_dataset import BrainDataset
 
 class Trainer:
-    def __init__(self, latent_dim, lambda_p, lambda_s, f, path, AE_type, batch_size=None, silent=False, use_cuda=True,
+    def __init__(self, latent_dim, lambda_u, lambda_n, lambda_a, f, path, AE_type, batch_size=None, silent=False, use_cuda=True,
                  loss='aexad', save_intermediate=False, dataset='mnist'):
         '''
         :param latent_dim:
@@ -46,8 +46,8 @@ class Trainer:
 
         self.save_intermediate = save_intermediate
 
-        if lambda_s is None:
-            lambda_s = len(self.train_loader.dataset) / np.sum(self.train_loader.dataset.labels)
+        if lambda_a is None:
+            lambda_a = len(self.train_loader.dataset) / np.sum(self.train_loader.dataset.labels)
 
         self.cuda = use_cuda and torch.cuda.is_available()
 
@@ -76,9 +76,9 @@ class Trainer:
 
         self.optimizer = torch.optim.Adam(self.model.parameters())
         if loss == 'aexad':
-            self.criterion = AEXAD_loss(lambda_p, lambda_s, f, self.cuda)
+            self.criterion = AEXAD_loss(lambda_n, lambda_a, f, self.cuda)
         if loss == 'aaexad':
-            self.criterion = AAEXAD_loss(lambda_p, lambda_s, f, self.cuda)
+            self.criterion = AAEXAD_loss(lambda_u, lambda_n, lambda_a, f, self.cuda)
         elif loss == 'mse':
             self.criterion = nn.MSELoss()
 
@@ -137,6 +137,7 @@ class Trainer:
             train_loss = 0.0
             tbar = tqdm(self.train_loader, disable=self.silent)
             for i, sample in enumerate(tbar):
+                #print("Y nel training: ", sample['label'])
                 image= sample['image']
                 label = sample['label']
                 gtmap = sample['gt_label']
@@ -145,6 +146,7 @@ class Trainer:
                     image = image.cuda()
                     gtmap = gtmap.cuda()
                     label = label.cuda()
+
                 output = self.model(image)
                 loss = self.criterion(output, image, gtmap, label)
                 self.optimizer.zero_grad()
@@ -164,9 +166,9 @@ class Trainer:
         torch.save(self.model.state_dict(), os.path.join(filename)) #args.experiment_dir, filename))
 
 
-def launch(data_path, epochs, batch_size, latent_dim, lambda_p, lambda_s, f, AE_type, loss='aexad',
+def launch(data_path, epochs, batch_size, latent_dim, lambda_u, lambda_n, lambda_a, f, AE_type, loss='aexad',
            save_intermediate=False, save_path='', use_cuda=True, dataset='mnist'):
-    trainer = Trainer(latent_dim, lambda_p, lambda_s, f, data_path, AE_type, batch_size, loss=loss,
+    trainer = Trainer(latent_dim, lambda_u, lambda_n, lambda_a, f, data_path, AE_type, batch_size, loss=loss,
                       save_intermediate=save_intermediate, use_cuda=use_cuda, dataset=dataset)
 
     #summary(trainer.model, (3, 448, 448))

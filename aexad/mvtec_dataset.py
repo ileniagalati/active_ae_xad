@@ -13,7 +13,7 @@ class MvtecAD(Dataset):
 
         self.train = train
         self.seed = seed
-        self.dim = (3, 448, 448)
+        self.dim = (3, 256, 256)
 
         self.transform = transforms.Compose([
             transforms.ToPILImage(),
@@ -43,9 +43,10 @@ class MvtecAD(Dataset):
         return len(self.images)
 
     def __getitem__(self, index):
-        image = self.images[index]
-        image_label = self.gt[index]
+        image = np.array(self.images[index], dtype=np.uint8)
+        image_label = np.array(self.gt[index], dtype=np.uint8)
 
-        sample = {'image': self.transform(image) / 255.0, 'label': self.labels[index],
+        sample = {'image': self.transform(image) / 255.0,
+                  'label': self.labels[index],
                   'gt_label': self.transform(image_label)/ 255.0}
         return sample

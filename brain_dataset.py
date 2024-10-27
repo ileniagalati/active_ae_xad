@@ -20,26 +20,15 @@ class BrainDataset(Dataset):
         ])
 
         if self.train:
-            x = np.load(os.path.join(path, f'X_0.npy'))
-            x1 = np.load(os.path.join(path, 'X_no.npy'))
-            x2 = np.load(os.path.join(path, 'X_an.npy'))
-            if x.ndim == x1.ndim == x2.ndim:
-                x = np.concatenate((x1, x2, x), axis=0)
-
-            y = np.load(os.path.join(path, f'Y_no.npy'))
-            y1 = np.load(os.path.join(path, 'Y_an.npy'))
-            if y.ndim == y1.ndim:
-                y = np.concatenate((y,y1), axis=0)
-
-            gt = np.load(os.path.join(path, f'GT_no.npy'))
-            gt1= np.load(os.path.join(path, f'GT_an.npy'))
-            if gt.ndim == gt1.ndim:
-                gt=np.concatenate((gt,gt1), axis=0)
+            split = 'train'
         else:
-            x = np.load(os.path.join(path, f'X_test.npy'))
-            y = np.load(os.path.join(path, f'Y_test.npy'))
-            gt = np.load(os.path.join(path, f'GT_test.npy'), allow_pickle=True)
+            split = 'test'
 
+        x = np.load(os.path.join(path, f'X_{split}.npy'))  # / 255.0)[:,:,:,0]
+        y = np.load(os.path.join(path, f'Y_{split}.npy'))
+        gt = np.load(os.path.join(path, f'GT_{split}.npy'))
+
+        print("y: ", y)
         self.gt = gt
         self.labels = y
         self.images = x
@@ -49,21 +38,14 @@ class BrainDataset(Dataset):
         return len(self.images)
 
     def __getitem__(self, index):
+
         image = self.images[index]
+        label =  self.labels[index]
 
-        if ( len(self.gt) >=1 ):
-            image_label = self.gt[index]
-            image = self.transform(image) / 255.0
-            label = 0
-            gt_label = self.transform(image_label) / 255.0
-        else:
-            image = self.transform(image) / 255.0
-            label= -1
-            gt_label = -1
+        image_label = self.gt[index]
 
-        sample = {
-            'image': image,
-            'label': label,
-            'gt_label': gt_label
-        }
+        sample = {'image': self.transform(image) / 255.0,
+                  'label': label,
+                  'gt_label': self.transform(image_label)/ 255.0}
+
         return sample
