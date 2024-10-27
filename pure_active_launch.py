@@ -14,11 +14,28 @@ import numpy as np
 from aexad.tools.utils import plot_image_tosave, plot_heatmap_tosave
 
 def f(x):
-    return 1-x
+    return 1 - x
 
-def training_active_aexad(data_path,epochs,dataset,lambda_u, lambda_n, lambda_a):
+# Function to select samples based on purity parameter
+def select_pure_samples(X_train, Y_train, GT_train, scores, purity=0.5):
+    # Get indices of unlabeled examples
+    unlabeled_idx = np.where(Y_train == 0)[0]
+
+    # Sort scores of unlabeled examples in ascending order and select the most "pure" half
+    selected_idx = np.argsort(scores[unlabeled_idx])[:int(purity * len(unlabeled_idx))]
+    pure_indices = unlabeled_idx[selected_idx]
+
+    # Create purified subsets
+    X_pure = X_train[pure_indices]
+    Y_pure = Y_train[pure_indices]
+    GT_pure = GT_train[pure_indices]
+
+    return X_pure, Y_pure, GT_pure, pure_indices
+
+# Main training function
+def training_active_aexad(data_path, epochs, dataset, lambda_u, lambda_n, lambda_a):
     heatmaps, scores, _, _, tot_time = launch_aexad(data_path, epochs, 16, 32, lambda_u, lambda_n, lambda_a, f=f, AE_type='conv',
-                                                    save_intermediate=True, save_path=ret_path,dataset=dataset,loss='aaexad')
+                                                    save_intermediate=True, save_path=ret_path, dataset=dataset, loss='aaexad')
     np.save(open(os.path.join(ret_path, 'aexad_htmaps.npy'), 'wb'), heatmaps)
     np.save(open(os.path.join(ret_path, 'aexad_scores.npy'), 'wb'), scores)
     times.append(tot_time)
@@ -26,11 +43,8 @@ def training_active_aexad(data_path,epochs,dataset,lambda_u, lambda_n, lambda_a)
 
     return heatmaps, scores, _, _, tot_time
 
-def run_mask_generation(from_path,to_path):
-    subprocess.run(["python3", "MaskGenerator.py" ,"-from_path",from_path,"-to_path",to_path])
-
+# Dataset update function
 def update_datasets(image_idx, mask_array, X_train, Y_train, GT_train):
-
     if np.sum(mask_array) > 0:
         Y_train[image_idx] = -1
         GT_train[image_idx] = mask_array
@@ -38,7 +52,6 @@ def update_datasets(image_idx, mask_array, X_train, Y_train, GT_train):
         Y_train[image_idx] = 1
         GT_train[image_idx] = mask_array
 
-    n = len(X_train)
     print("unlabeled examples: ", np.sum(Y_train == 0))
     print("normal examples: ", np.sum(Y_train == 1))
     print("anomalous examples: ", np.sum(Y_train == -1))
@@ -53,34 +66,25 @@ def update_datasets(image_idx, mask_array, X_train, Y_train, GT_train):
 
     return X_train, Y_train, GT_train, lambda_u, lambda_n, lambda_a
 
-
-
 if __name__ == '__main__':
-
-
     print(torch.cuda.is_available())
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-ds', type=str, help='Dataset to use')
     parser.add_argument('-budget', type=int, help='Budget')
     args = parser.parse_args()
-    b=args.budget
+    b = args.budget
 
-    dataset_path= f'datasets/{args.ds}'
+    dataset_path = f'datasets/{args.ds}'
 
     if args.ds == 'brain':
-        X_train, Y_train, GT_train, X_test, Y_test, GT_test = \
-            load_brainMRI_dataset(dataset_path)
-    if args.ds == 'mvtec':
-        X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT = \
-            mvtec(5,dataset_path,15)
+        X_train, Y_train, GT_train, X_test, Y_test, GT_test = load_brainMRI_dataset(dataset_path)
+    elif args.ds == 'mvtec':
+        X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT = mvtec(5, dataset_path, 15)
 
-    data_path = os.path.join('results','test_data', str(args.ds))
+    data_path = os.path.join('results', 'test_data', str(args.ds))
     if not os.path.exists(data_path):
         os.makedirs(data_path)
-
-    n_examples=len(X_train)
-    print("numero di esempi: ",n_examples)
 
     np.save(open(os.path.join(data_path, 'X_train.npy'), 'wb'), X_train)
     np.save(open(os.path.join(data_path, 'Y_train.npy'), 'wb'), Y_train)
@@ -91,73 +95,50 @@ if __name__ == '__main__':
     np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
 
     np.save(open(os.path.join(data_path, 'GT.npy'), 'wb'), GT)
-    ret_path = os.path.join('results','output', str(args.ds))
+    ret_path = os.path.join('results', 'output', str(args.ds))
     if not os.path.exists(ret_path):
         os.makedirs(ret_path)
-    np.save(open(os.path.join(ret_path, 'gt.npy'), 'wb'), GT_test)
-    np.save(open(os.path.join(ret_path, 'labels.npy'), 'wb'), Y_test)
-
-    pickle.dump(args, open(os.path.join(ret_path, 'args'), 'wb'))
 
     times = []
 
-    print("sum: ", np.sum(Y_train == 0))
-
-    #lambda_u = n_examples / np.sum(Y_train == 0)
     lambda_u = 1 / np.sum(Y_train == 0)
-    lambda_n=0
-    lambda_a=0
-
-    print("first lambda_u: ", lambda_u)
+    lambda_n = 0
+    lambda_a = 0
+    print("Initial lambda_u:", lambda_u)
 
     for x in range(0, b):
+        heatmaps, scores, _, _, tot_time = training_active_aexad(data_path, epochs=1, dataset=str(args.ds),
+                                                                 lambda_u=lambda_u, lambda_n=lambda_n, lambda_a=lambda_a)
 
-        heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=1,dataset=str(args.ds),
-                                                                 lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a)
+        # Select "pure" subset of unlabeled data for training
+        X_pure, Y_pure, GT_pure, selected_indices = select_pure_samples(X_train, Y_train, GT_train, scores, purity=0.5)
 
-        active_images=os.path.join('results',"query",str(args.ds),str(x))
+        active_images = os.path.join('results', "query", str(args.ds), str(x))
         if not os.path.exists(active_images):
             os.makedirs(active_images)
 
-        htmaps_aexad_conv = np.load(open(os.path.join(ret_path, 'aexad_htmaps.npy'), 'rb'))
-        scores_aexad_conv = np.load(open(os.path.join(ret_path, 'aexad_scores.npy'), 'rb'))
-
-        idx = np.argsort(scores_aexad_conv[Y_train == 0])[::-1]
-        img="a"
-        ext=".png"
-
-        #query selection
-        image_to_save = X_train[Y_train==0][idx[0]]
-
+        # Save the most "pure" image for manual or labeled mask generation
+        image_to_save = X_pure[0]
         img_to_save = Image.fromarray(image_to_save.astype(np.uint8))
-        img_to_save.save(os.path.join(active_images, img+ext))
-        print("dim image: ", image_to_save.shape)
+        img_to_save.save(os.path.join(active_images, 'a.png'))
 
-        mask_images=os.path.join('results',"mask",str(args.ds),str(x))
+        mask_images = os.path.join('results', "mask", str(args.ds), str(x))
         if not os.path.exists(mask_images):
             os.makedirs(mask_images)
 
-        from_path=os.path.join(active_images,img+ext)
-        to_path=os.path.join(mask_images,img+"_mask"+ext)
+        from_path = os.path.join(active_images, 'a.png')
+        to_path = os.path.join(mask_images, 'a_mask.png')
 
-        #generazione della maschera manuale
-        #run_mask_generation(from_path,to_path)
-
-        #generazione della maschera dal dataset etichettato
-        mask_from_gt = GT[Y_train == 0][idx[0]]
+        # Generating mask from labeled dataset
+        mask_from_gt = GT_pure[0]
         mask_img = Image.fromarray(mask_from_gt.astype(np.uint8))
-        to_path = os.path.join(mask_images, img + "_mask" + ext)
         mask_img.save(to_path)
 
-        #aggiornamento del dataset
-        mask_img = Image.open(to_path)
+        # Update the dataset with the selected "pure" sample
         mask_array = np.array(mask_img)
-        print("dimensioni maschera: ", mask_array.shape)
+        X_train, Y_train, GT_train, lambda_u, lambda_n, lambda_a = update_datasets(selected_indices[0], mask_array, X_train, Y_train, GT_train)
 
-        #aggiornamento del dataset
-        X_train, Y_train, GT_train, lambda_u, lambda_n, lambda_a = \
-            update_datasets(idx[0], mask_array, X_train, Y_train, GT_train)
-
+        # Save updated data
         np.save(open(os.path.join(data_path, 'X_train.npy'), 'wb'), X_train)
         np.save(open(os.path.join(data_path, 'Y_train.npy'), 'wb'), Y_train)
         np.save(open(os.path.join(data_path, 'GT_train.npy'), 'wb'), GT_train)
