@@ -17,7 +17,7 @@ def f(x):
     return 1-x
 
 def training_active_aexad(data_path,epochs,dataset,lambda_u, lambda_n, lambda_a):
-    heatmaps, scores, _, _, tot_time = launch_aexad(data_path, epochs, 16, 32, lambda_u, lambda_n, lambda_a, f=f, AE_type='conv',
+    heatmaps, scores, gtmaps, labels, tot_time = launch_aexad(data_path, epochs, 16, 32, lambda_u, lambda_n, lambda_a, f=f, AE_type='conv',
                                                     save_intermediate=True, save_path=ret_path,dataset=dataset,loss='aaexad')
     np.save(open(os.path.join(ret_path, 'aexad_htmaps.npy'), 'wb'), heatmaps)
     np.save(open(os.path.join(ret_path, 'aexad_scores.npy'), 'wb'), scores)
@@ -109,7 +109,7 @@ if __name__ == '__main__':
 
     for x in range(0, b):
 
-        heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=args.epochs,dataset=str(args.ds),
+        heatmaps, scores, gtmaps, labels, tot_time = training_active_aexad(data_path,epochs=args.epochs,dataset=str(args.ds),
                                                                  lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a)
 
         active_images=os.path.join('results',"query",str(args.ds),str(x))
@@ -163,5 +163,8 @@ if __name__ == '__main__':
         np.save(open(os.path.join(data_path, 'X_test.npy'), 'wb'), X_test)
         np.save(open(os.path.join(data_path, 'Y_test.npy'), 'wb'), Y_test)
         np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
-        np.save(open(os.path.join(ret_path, 'gt.npy'), 'wb'), GT_test)
-        np.save(open(os.path.join(ret_path, 'labels.npy'), 'wb'), Y_test)
+        np.save(open(os.path.join(ret_path, 'gt.npy'), 'wb'), gtmaps)
+        np.save(open(os.path.join(ret_path, 'labels.npy'), 'wb'), labels)
+
+    heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=args.epochs,dataset=str(args.ds),
+                                                             lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a)
