@@ -24,7 +24,7 @@ def training_active_aexad(data_path,epochs,dataset,lambda_u, lambda_n, lambda_a)
     times.append(tot_time)
     np.save(open(os.path.join(ret_path, 'times.npy'), 'wb'), np.array(times))
 
-    return heatmaps, scores, _, _, tot_time
+    return heatmaps, scores, gtmaps, labels, tot_time
 
 def run_mask_generation(from_path,to_path):
     subprocess.run(["python3", "MaskGenerator.py" ,"-from_path",from_path,"-to_path",to_path])
@@ -168,3 +168,7 @@ if __name__ == '__main__':
 
     heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=args.epochs,dataset=str(args.ds),
                                                              lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a)
+    np.save(open(os.path.join(ret_path, f'aexad_htmaps_{b}.npy'), 'wb'), heatmaps)
+    np.save(open(os.path.join(ret_path, f'aexad_scores_{b}.npy'), 'wb'), scores)
+    np.save(open(os.path.join(ret_path, 'gt.npy'), 'wb'), gtmaps)
+    np.save(open(os.path.join(ret_path, 'labels.npy'), 'wb'), labels)
