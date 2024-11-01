@@ -67,7 +67,7 @@ def update_datasets(image_idx, mask_array, X_train, Y_train, GT_train):
     return X_train, Y_train, GT_train, lambda_u, lambda_n, lambda_a
 
 if __name__ == '__main__':
-    print(torch.cuda.is_available())
+    print("is cuda available: ",torch.cuda.is_available())
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-ds', type=str, help='Dataset to use')

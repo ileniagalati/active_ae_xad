@@ -47,14 +47,16 @@ def update_datasets(image_idx, mask_array, X_train, Y_train, GT_train):
     print("normal lambda: ", lambda_n)
     print("anomalous lambda: ", lambda_a)
 
-    return X_train, Y_train, GT_train, lambda_u, lambda_n, lambda_a
+    X_test = X_train
+    Y_test = Y_train
+    GT_test = GT_train
 
-
+    return X_train, Y_train, GT_train, X_test, Y_test, GT_test, lambda_u, lambda_n, lambda_a
 
 if __name__ == '__main__':
 
 
-    print(torch.cuda.is_available())
+    print("is cuda available: ",torch.cuda.is_available())
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-ds', type=str, help='Dataset to use')
@@ -68,7 +70,7 @@ if __name__ == '__main__':
         X_train, Y_train, GT_train, X_test, Y_test, GT_test = \
             load_brainMRI_dataset(dataset_path)
     if args.ds == 'mvtec':
-        X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT = \
+        X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT_expert = \
             mvtec(5,dataset_path,15)
 
     data_path = os.path.join('results','test_data', str(args.ds))
@@ -86,7 +88,7 @@ if __name__ == '__main__':
     np.save(open(os.path.join(data_path, 'Y_test.npy'), 'wb'), Y_test)
     np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
 
-    np.save(open(os.path.join(data_path, 'GT.npy'), 'wb'), GT)
+    np.save(open(os.path.join(data_path, 'GT.npy'), 'wb'), GT_expert)
     ret_path = os.path.join('results','output', str(args.ds))
     if not os.path.exists(ret_path):
         os.makedirs(ret_path)
@@ -112,8 +114,8 @@ if __name__ == '__main__':
         if not os.path.exists(active_images):
             os.makedirs(active_images)
 
-        htmaps_aexad_conv = np.load(open(os.path.join(ret_path, 'aexad_htmaps.npy'), 'rb'))
-        scores_aexad_conv = np.load(open(os.path.join(ret_path, 'aexad_scores.npy'), 'rb'))
+        htmaps_aexad_conv = np.load(open(os.path.join(ret_path, f'aexad_htmaps_{b}.npy'), 'rb'))
+        scores_aexad_conv = np.load(open(os.path.join(ret_path, f'aexad_scores_{b}.npy'), 'rb'))
 
         idx = np.argsort(scores_aexad_conv[Y_train == 0])[::-1]
         img="a"
@@ -137,7 +139,7 @@ if __name__ == '__main__':
         #run_mask_generation(from_path,to_path)
 
         #generazione della maschera dal dataset etichettato
-        mask_from_gt = GT[Y_train == 0][idx[0]]
+        mask_from_gt = GT_expert[Y_train == 0][idx[0]]
         mask_img = Image.fromarray(mask_from_gt.astype(np.uint8))
         to_path = os.path.join(mask_images, img + "_mask" + ext)
         mask_img.save(to_path)
@@ -148,7 +150,7 @@ if __name__ == '__main__':
         print("dimensioni maschera: ", mask_array.shape)
 
         #aggiornamento del dataset
-        X_train, Y_train, GT_train, lambda_u, lambda_n, lambda_a = \
+        X_train, Y_train, GT_train, X_test, Y_test, GT_test, lambda_u, lambda_n, lambda_a = \
             update_datasets(idx[0], mask_array, X_train, Y_train, GT_train)
 
         np.save(open(os.path.join(data_path, 'X_train.npy'), 'wb'), X_train)
