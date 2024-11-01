@@ -39,13 +39,9 @@ def update_datasets(image_idx, mask_array, X_train, Y_train, GT_train):
         GT_train[image_idx] = mask_array
 
     n = len(X_train)
-    print("unlabeled examples: ", np.sum(Y_train == 0))
-    print("normal examples: ", np.sum(Y_train == 1))
-    print("anomalous examples: ", np.sum(Y_train == -1))
-
-    lambda_u = 1 / np.sum(Y_train == 0) if np.sum(Y_train == 0) > 0 else 0
-    lambda_n = 1 / np.sum(Y_train == 1) if np.sum(Y_train == 1) > 0 else 0
-    lambda_a = 1 / np.sum(Y_train == -1) if np.sum(Y_train == -1) > 0 else 0
+    lambda_u = n / np.sum(Y_train == 0) if np.sum(Y_train == 0) > 0 else 0
+    lambda_n = n / np.sum(Y_train == 1) if np.sum(Y_train == 1) > 0 else 0
+    lambda_a = n / np.sum(Y_train == -1) if np.sum(Y_train == -1) > 0 else 0
 
     print("unlabeled lambda: ", lambda_u)
     print("normal lambda: ", lambda_n)
@@ -101,10 +97,7 @@ if __name__ == '__main__':
 
     times = []
 
-    print("sum: ", np.sum(Y_train == 0))
-
-    #lambda_u = n_examples / np.sum(Y_train == 0)
-    lambda_u = 1 / np.sum(Y_train == 0)
+    lambda_u = n_examples / np.sum(Y_train == 0)
     lambda_n=0
     lambda_a=0
 
@@ -112,7 +105,7 @@ if __name__ == '__main__':
 
     for x in range(0, b):
 
-        heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=1,dataset=str(args.ds),
+        heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=15,dataset=str(args.ds),
                                                                  lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a)
 
         active_images=os.path.join('results',"query",str(args.ds),str(x))
