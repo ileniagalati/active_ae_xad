@@ -61,6 +61,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-ds', type=str, help='Dataset to use')
     parser.add_argument('-budget', type=int, help='Budget')
+    parser.add_argument('-epochs', type=int, help='Epochs to train')
+
     args = parser.parse_args()
     b=args.budget
 
@@ -107,7 +109,7 @@ if __name__ == '__main__':
 
     for x in range(0, b):
 
-        heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=1,dataset=str(args.ds),
+        heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=args.epochs,dataset=str(args.ds),
                                                                  lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a)
 
         active_images=os.path.join('results',"query",str(args.ds),str(x))
@@ -157,3 +159,9 @@ if __name__ == '__main__':
         np.save(open(os.path.join(data_path, 'X_train.npy'), 'wb'), X_train)
         np.save(open(os.path.join(data_path, 'Y_train.npy'), 'wb'), Y_train)
         np.save(open(os.path.join(data_path, 'GT_train.npy'), 'wb'), GT_train)
+
+        np.save(open(os.path.join(data_path, 'X_test.npy'), 'wb'), X_test)
+        np.save(open(os.path.join(data_path, 'Y_test.npy'), 'wb'), Y_test)
+        np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
+        np.save(open(os.path.join(ret_path, 'gt.npy'), 'wb'), GT_test)
+        np.save(open(os.path.join(ret_path, 'labels.npy'), 'wb'), Y_test)
