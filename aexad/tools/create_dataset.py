@@ -270,6 +270,8 @@ def mvtec(cl, path, n_anom_per_cls, seed=None):
     for cl_a in outlier_classes:
         if cl_a == 'good':
             continue
+        if cl_a == '.DS_Store':
+            continue
 
         outlier_file = np.array(os.listdir(os.path.join(outlier_data_dir, cl_a)))
         idxs = np.random.permutation(len(outlier_file))

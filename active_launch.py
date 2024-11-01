@@ -107,17 +107,18 @@ if __name__ == '__main__':
 
     for x in range(0, b):
 
-        heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=15,dataset=str(args.ds),
+        heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=1,dataset=str(args.ds),
                                                                  lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a)
 
         active_images=os.path.join('results',"query",str(args.ds),str(x))
         if not os.path.exists(active_images):
             os.makedirs(active_images)
 
-        htmaps_aexad_conv = np.load(open(os.path.join(ret_path, f'aexad_htmaps_{b}.npy'), 'rb'))
-        scores_aexad_conv = np.load(open(os.path.join(ret_path, f'aexad_scores_{b}.npy'), 'rb'))
 
-        idx = np.argsort(scores_aexad_conv[Y_train == 0])[::-1]
+        np.save(open(os.path.join(ret_path, f'aexad_htmaps_{b}.npy'), 'wb'), heatmaps)
+        np.save(open(os.path.join(ret_path, f'aexad_scores_{b}.npy'), 'wb'), scores)
+
+        idx = np.argsort(scores[Y_train == 0])[::-1]
         img="a"
         ext=".png"
 
