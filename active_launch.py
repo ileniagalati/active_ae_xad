@@ -29,14 +29,20 @@ def training_active_aexad(data_path,epochs,dataset,lambda_u, lambda_n, lambda_a)
 def run_mask_generation(from_path,to_path):
     subprocess.run(["python3", "MaskGenerator.py" ,"-from_path",from_path,"-to_path",to_path])
 
-def update_datasets(image_idx, mask_array, X_train, Y_train, GT_train):
 
+def update_datasets(image_idx, mask_array, X_train, Y_train, GT_train, purity):
     if np.sum(mask_array) > 0:
         Y_train[image_idx] = -1
         GT_train[image_idx] = mask_array
     else:
         Y_train[image_idx] = 1
         GT_train[image_idx] = mask_array
+
+    # Filtra il training set in base alla purity (seleziona solo gli esempi con score più basso)
+    anomaly_indices = np.where(Y_train == -1)[0]
+    top_k = int(len(anomaly_indices) * purity)
+    selected_indices = anomaly_indices[np.argsort(scores[anomaly_indices])[:top_k]]
+    Y_train[selected_indices] = -1  # Imposta solo i migliori come anomalie
 
     n = len(X_train)
     lambda_u = n / np.sum(Y_train == 0) if np.sum(Y_train == 0) > 0 else 0
@@ -63,10 +69,12 @@ if __name__ == '__main__':
     parser.add_argument('-budget', type=int, help='Budget')
     parser.add_argument('-epochs', type=int, help='Epochs to train')
     parser.add_argument('-seed', type=int, help='Seed')
-
+    parser.add_argument('-purity', type=float, default=0.5, help='Purity parameter for active learning')
     args = parser.parse_args()
-    b=args.budget
-    s=args.seed
+
+    b = args.budget
+    s = args.seed
+    purity = args.purity
 
     dataset_path= f'datasets/{args.ds}'
 
@@ -123,6 +131,9 @@ if __name__ == '__main__':
         np.save(open(os.path.join(ret_path, f'aexad_scores_{b}.npy'), 'wb'), scores)
 
         idx = np.argsort(scores[Y_train == 0])[::-1]
+        #purity indexes
+
+
         img="a"
         ext=".png"
 
@@ -154,7 +165,7 @@ if __name__ == '__main__':
 
         #aggiornamento del dataset
         X_train, Y_train, GT_train, X_test, Y_test, GT_test, lambda_u, lambda_n, lambda_a = \
-            update_datasets(idx[0], mask_array, X_train, Y_train, GT_train)
+            update_datasets(idx[0], mask_array, X_train, Y_train, GT_train, purity)
 
         np.save(open(os.path.join(data_path, 'X_train.npy'), 'wb'), X_train)
         np.save(open(os.path.join(data_path, 'Y_train.npy'), 'wb'), Y_train)
