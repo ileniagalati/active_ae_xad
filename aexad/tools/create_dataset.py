@@ -251,7 +251,7 @@ def mvtec(cl, path, n_anom_per_cls, seed=None):
     normal_files_tr = os.listdir(f_path)
     for file in normal_files_tr:
         if file.lower().endswith(('png', 'jpg', 'npy')):
-            image = np.array(Image.open(os.path.join(f_path, file)).convert('RGB'))#.resize(img_size))
+            image = np.array(Image.open(os.path.join(f_path, file)).convert('RGB').resize((256, 256),Image.NEAREST))
             X_train.append(image)
             GT_train.append(np.zeros_like(image, dtype=np.uint8))
             GT.append(np.zeros_like(image, dtype=np.uint8))
@@ -263,7 +263,7 @@ def mvtec(cl, path, n_anom_per_cls, seed=None):
     normal_files_te = os.listdir(f_path)
     for file in normal_files_te:
         if file.lower().endswith(('png', 'jpg', 'npy')):
-            image = np.array(Image.open(os.path.join(f_path, file)).convert('RGB'))
+            image = np.array(Image.open(os.path.join(f_path, file)).convert('RGB').resize((256, 256),Image.NEAREST))
             X_test.append(image)
             GT_test.append(np.zeros_like(image, dtype=np.uint8))
 
@@ -280,14 +280,14 @@ def mvtec(cl, path, n_anom_per_cls, seed=None):
 
         for file in outlier_file[idxs[:n_anom_per_cls]]:
             if file.lower().endswith(('png', 'jpg', 'npy')):
-                image = np.array(Image.open(os.path.join(root, 'test', cl_a, file)).convert('RGB'))
+                image = np.array(Image.open(os.path.join(root, 'test', cl_a, file)).convert('RGB').resize((256, 256),Image.NEAREST))
                 #print("img shape: ", image.shape)
                 X_train.append(image)
                 GT_train.append(np.zeros_like(image, dtype=np.uint8))
                 X_test.append(image)
                 GT_test.append(np.zeros_like(image, dtype=np.uint8))
                 Y.append(1)
-                GT.append(np.array(Image.open(os.path.join(root, 'ground_truth/' + cl_a + '/' + file).replace('.png', '_mask.png')).convert('RGB')))
+                GT.append(np.array(Image.open(os.path.join(root, 'ground_truth/' + cl_a + '/' + file).replace('.png', '_mask.png')).convert('RGB')).resize((256, 256),Image.NEAREST))
 
     X_train = np.array(X_train).astype(np.uint8)
     X_test = np.array(X_test).astype(np.uint8)
