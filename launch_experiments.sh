@@ -1,3 +1,3 @@
 #!/bin/bash
 
-python3 active_launch.py -ds mvtec -budget 1 -epochs 6
+python3 active_launch.py -ds mvtec -budget 1 -epochs 5 -seed 29

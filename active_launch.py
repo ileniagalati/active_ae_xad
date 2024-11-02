@@ -62,9 +62,11 @@ if __name__ == '__main__':
     parser.add_argument('-ds', type=str, help='Dataset to use')
     parser.add_argument('-budget', type=int, help='Budget')
     parser.add_argument('-epochs', type=int, help='Epochs to train')
+    parser.add_argument('-seed', type=int, help='Seed')
 
     args = parser.parse_args()
     b=args.budget
+    s=args.seed
 
     dataset_path= f'datasets/{args.ds}'
 
@@ -73,7 +75,7 @@ if __name__ == '__main__':
             load_brainMRI_dataset(dataset_path)
     if args.ds == 'mvtec':
         X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT_expert, Y_expert = \
-            mvtec(5,dataset_path,10)
+            mvtec(5,dataset_path,10,seed=s)
 
     data_path = os.path.join('results','test_data', str(args.ds))
     if not os.path.exists(data_path):
