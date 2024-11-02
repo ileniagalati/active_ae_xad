@@ -18,7 +18,8 @@ for i in range(GT.shape[0]):
     img = Image.fromarray(GT[i])
     img_resized = img.resize((256, 256),Image.NEAREST)
     gt_resized[i] = np.transpose(np.array(img_resized), (2, 0, 1))
-print("Nuova forma di GT:", gt_resized.shape)
+GT=gt_resized
+print("Nuova forma di GT:", GT.shape)
 
 
 Y = np.load(open(os.path.join(ret_path, 'labels.npy'), 'rb'))
@@ -26,11 +27,11 @@ Y = np.load(open(os.path.join(ret_path, 'labels.npy'), 'rb'))
 htmaps_aexad = np.load(open(os.path.join(ret_path, 'aexad_htmaps_f.npy'), 'rb'))
 scores_aexad = np.load(open(os.path.join(ret_path, 'aexad_scores_f.npy'), 'rb'))
 
-print("gt shape: ", gt_resized.shape)
+print("gt shape: ", GT.shape)
 print("y shape: ", Y.shape)
 print("ht shape: ", htmaps_aexad.shape)
 
-htmap_stats.append(Xauc(gt_resized[Y == 1], \
+htmap_stats.append(Xauc(GT[Y == 1], \
             htmaps_aexad[Y == 1]))
 det_stats.append(roc_auc_score(Y, scores_aexad))
 htmap_stats = np.array(htmap_stats)
