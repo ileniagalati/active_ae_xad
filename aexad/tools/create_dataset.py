@@ -242,28 +242,30 @@ def mvtec(cl, path, n_anom_per_cls, seed=None):
     GT_train = []
     GT_test = []
     GT = []
+    Y=[]
 
-    img_size = (900, 900)  # Define the target size for resizing
+    #img_size = (256, 256)  # Define the target size for resizing
 
     # Add normal data to train set
     f_path = os.path.join(root, 'train', 'good')
     normal_files_tr = os.listdir(f_path)
     for file in normal_files_tr:
         if file.lower().endswith(('png', 'jpg', 'npy')):
-            image = np.array(Image.open(os.path.join(f_path, file)).convert('RGB').resize(img_size))
+            image = np.array(Image.open(os.path.join(f_path, file)).convert('RGB'))#.resize(img_size))
             X_train.append(image)
-            GT_train.append(np.zeros((img_size[0], img_size[1]), dtype=np.uint8))
-            GT.append(np.zeros((img_size[0], img_size[1]), dtype=np.uint8))
+            GT_train.append(np.zeros_like(image, dtype=np.uint8))
+            GT.append(np.zeros_like(image, dtype=np.uint8))
+            Y.append(0)
+
 
     # Add normal data to test set
     f_path = os.path.join(root, 'train', 'good')
     normal_files_te = os.listdir(f_path)
     for file in normal_files_te:
         if file.lower().endswith(('png', 'jpg', 'npy')):
-            image = np.array(Image.open(os.path.join(f_path, file)).convert('RGB').resize(img_size))
+            image = np.array(Image.open(os.path.join(f_path, file)).convert('RGB'))
             X_test.append(image)
-            GT_test.append(np.zeros((img_size[0], img_size[1]), dtype=np.uint8))
-            #GT.append(np.zeros((img_size[0], img_size[1]), dtype=np.uint8))
+            GT_test.append(np.zeros_like(image, dtype=np.uint8))
 
     outlier_data_dir = os.path.join(root, 'test')
     outlier_classes = os.listdir(outlier_data_dir)
@@ -276,37 +278,29 @@ def mvtec(cl, path, n_anom_per_cls, seed=None):
         outlier_file = np.array(os.listdir(os.path.join(outlier_data_dir, cl_a)))
         idxs = np.random.permutation(len(outlier_file))
 
-        # Train
         for file in outlier_file[idxs[:n_anom_per_cls]]:
             if file.lower().endswith(('png', 'jpg', 'npy')):
-                image = np.array(Image.open(os.path.join(root, 'test', cl_a, file)).convert('RGB').resize(img_size))
+                image = np.array(Image.open(os.path.join(root, 'test', cl_a, file)).convert('RGB'))
+                #print("img shape: ", image.shape)
                 X_train.append(image)
-                GT_train.append(np.zeros((img_size[0], img_size[1]), dtype=np.uint8))
+                GT_train.append(np.zeros_like(image, dtype=np.uint8))
                 X_test.append(image)
-                GT_test.append(np.zeros((img_size[0], img_size[1]), dtype=np.uint8))
+                GT_test.append(np.zeros_like(image, dtype=np.uint8))
+                Y.append(1)
+                GT.append(np.array(Image.open(os.path.join(root, 'ground_truth/' + cl_a + '/' + file).replace('.png', '_mask.png')).convert('RGB')))
 
-                mask_file = os.path.join(root, 'ground_truth', cl_a, file.replace('.png', '_mask.png'))
-                mask_image = np.array(Image.open(mask_file).convert('L').resize(img_size))
-                GT.append(mask_image)
-
-    print('GT train: ', len(GT_train))
-    print('GT test: ', len(GT_test))
     X_train = np.array(X_train).astype(np.uint8)
     X_test = np.array(X_test).astype(np.uint8)
-    print("X_train: ", X_train.shape)
-    print("X_test: ", X_test.shape)
 
+    GT=np.array(GT)
     GT_train = np.array(GT_train)
     GT_test = np.array(GT_test)
-    GT=np.array(GT)
+
+    Y=np.array(Y)
 
     Y_train = np.zeros(X_train.shape[0])
     Y_test = np.zeros(X_test.shape[0])
-
-    print("Y_train sum: ", Y_train.sum())
-    print("Y_test sum: ", Y_test.sum())
-
-    return X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT
+    return X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT, Y
 
 
 

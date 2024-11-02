@@ -72,8 +72,8 @@ if __name__ == '__main__':
         X_train, Y_train, GT_train, X_test, Y_test, GT_test = \
             load_brainMRI_dataset(dataset_path)
     if args.ds == 'mvtec':
-        X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT_expert = \
-            mvtec(5,dataset_path,15)
+        X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT_expert, Y_expert = \
+            mvtec(5,dataset_path,10)
 
     data_path = os.path.join('results','test_data', str(args.ds))
     if not os.path.exists(data_path):
@@ -94,8 +94,8 @@ if __name__ == '__main__':
     ret_path = os.path.join('results','output', str(args.ds))
     if not os.path.exists(ret_path):
         os.makedirs(ret_path)
-    np.save(open(os.path.join(ret_path, 'gt.npy'), 'wb'), GT_test)
-    np.save(open(os.path.join(ret_path, 'labels.npy'), 'wb'), Y_test)
+    np.save(open(os.path.join(ret_path, 'gt.npy'), 'wb'), GT_expert)
+    np.save(open(os.path.join(ret_path, 'labels.npy'), 'wb'), Y_expert)
 
     pickle.dump(args, open(os.path.join(ret_path, 'args'), 'wb'))
 
@@ -150,6 +150,7 @@ if __name__ == '__main__':
         #aggiornamento del dataset
         mask_img = Image.open(to_path)
         mask_array = np.array(mask_img)
+        #mask_array = np.any(mask_array > 0, axis=2)
         print("dimensioni maschera: ", mask_array.shape)
 
         #aggiornamento del dataset
@@ -163,12 +164,10 @@ if __name__ == '__main__':
         np.save(open(os.path.join(data_path, 'X_test.npy'), 'wb'), X_test)
         np.save(open(os.path.join(data_path, 'Y_test.npy'), 'wb'), Y_test)
         np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
-        np.save(open(os.path.join(ret_path, 'gt.npy'), 'wb'), gtmaps)
-        np.save(open(os.path.join(ret_path, 'labels.npy'), 'wb'), labels)
+
+
 
     heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=args.epochs,dataset=str(args.ds),
                                                              lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a)
-    np.save(open(os.path.join(ret_path, f'aexad_htmaps_{b}.npy'), 'wb'), heatmaps)
-    np.save(open(os.path.join(ret_path, f'aexad_scores_{b}.npy'), 'wb'), scores)
-    np.save(open(os.path.join(ret_path, 'gt.npy'), 'wb'), gtmaps)
-    np.save(open(os.path.join(ret_path, 'labels.npy'), 'wb'), labels)
+    np.save(open(os.path.join(ret_path, 'aexad_htmaps_f.npy'), 'wb'), heatmaps)
+    np.save(open(os.path.join(ret_path, 'aexad_scores_f.npy'), 'wb'), scores)

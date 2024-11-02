@@ -9,6 +9,7 @@ def Xauc(ground_truth,heatmap):
     '''
     return roc_auc_score(ground_truth.flatten(),heatmap.flatten())
 
+
 def IoU(ground_truth,heatmap):
     '''
     :param ground_truth: binary matrix indicating whether each pixel of an image is actually anomalous (1) or normal (0)
