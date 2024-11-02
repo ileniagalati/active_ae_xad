@@ -287,7 +287,7 @@ def mvtec(cl, path, n_anom_per_cls, seed=None):
                 X_test.append(image)
                 GT_test.append(np.zeros_like(image, dtype=np.uint8))
                 Y.append(1)
-                GT.append(np.array(Image.open(os.path.join(root, 'ground_truth/' + cl_a + '/' + file).replace('.png', '_mask.png')).convert('RGB')).resize((256, 256),Image.NEAREST))
+                GT.append(np.array(Image.open(os.path.join(root, 'ground_truth/' + cl_a + '/' + file).replace('.png', '_mask.png')).convert('RGB').resize((256, 256),Image.NEAREST)))
 
     X_train = np.array(X_train).astype(np.uint8)
     X_test = np.array(X_test).astype(np.uint8)
