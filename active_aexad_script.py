@@ -239,7 +239,7 @@ def launch(data_path, epochs, batch_size, latent_dim, lambda_u, lambda_n, lambda
     #summary(trainer.model, (3, 448, 448))
 
     start = time()
-    trainer.train(epochs, save_path=save_path, restart_from_scratch=False)
+    trainer.train(epochs, save_path=save_path, restart_from_scratch=True)
     tot_time = time() - start
 
     heatmaps, scores, gtmaps, labels = trainer.test()
