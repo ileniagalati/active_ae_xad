@@ -2,7 +2,7 @@ from operator import index
 from aexad.tools.create_dataset import square, square_diff, mvtec
 import matplotlib
 #matplotlib.use('Agg')  # Imposta il backend corretto per evitare il problema
-%matplotlib inline
+
 
 import matplotlib.pyplot as plt
 # Resto del tuo codice
