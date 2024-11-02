@@ -151,8 +151,6 @@ if __name__ == '__main__':
         #aggiornamento del dataset
         mask_img = Image.open(to_path)
         mask_array = np.array(mask_img)
-        #mask_array = np.any(mask_array > 0, axis=2)
-        print("dimensioni maschera: ", mask_array.shape)
 
         #aggiornamento del dataset
         X_train, Y_train, GT_train, X_test, Y_test, GT_test, lambda_u, lambda_n, lambda_a = \
