@@ -234,12 +234,12 @@ class Trainer:
 def launch(data_path, epochs, batch_size, latent_dim, lambda_u, lambda_n, lambda_a, f, AE_type, loss='aexad',
            save_intermediate=False, save_path='', use_cuda=True, dataset='mnist'):
     trainer = Trainer(latent_dim, lambda_u, lambda_n, lambda_a, f, data_path, AE_type, batch_size, loss=loss,
-                      save_intermediate=save_intermediate, use_cuda=use_cuda, dataset=dataset,restart_from_scratch=False)
+                      save_intermediate=save_intermediate, use_cuda=use_cuda, dataset=dataset)
 
     #summary(trainer.model, (3, 448, 448))
 
     start = time()
-    trainer.train(epochs, save_path=save_path)
+    trainer.train(epochs, save_path=save_path,restart_from_scratch=False)
     tot_time = time() - start
 
     heatmaps, scores, gtmaps, labels = trainer.test()
