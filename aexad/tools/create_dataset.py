@@ -225,7 +225,7 @@ def square_diff(dig,perc_anom_train = 0.2,perc_anom_test = 0.2,size = 5,intensit
 
     return X_train, Y_train, X_test, Y_test, GT_train, GT_test
 
-def mvtec(cl, path, n_anom_per_cls, seed=None):
+def mvtec(cl, path, n_anom_per_cls, seed=29):
     np.random.seed(seed=seed)
 
     labels = (
