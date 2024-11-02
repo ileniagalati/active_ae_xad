@@ -1,15 +1,11 @@
 from operator import index
 from aexad.tools.create_dataset import square, square_diff, mvtec
 import matplotlib
-#matplotlib.use('Agg')  # Imposta il backend corretto per evitare il problema
-
-
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-# Resto del tuo codice
-
-
 from kornia.filters import gaussian_blur2d
 import torch
+
 def weighted_htmaps(htmaps, n_pixels=1):
     w_htmaps = np.empty_like(htmaps)
     for k in range(len(htmaps)):

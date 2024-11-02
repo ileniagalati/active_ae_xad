@@ -18,7 +18,7 @@ def f(x):
 
 def training_active_aexad(data_path,epochs,dataset,lambda_u, lambda_n, lambda_a):
     heatmaps, scores, gtmaps, labels, tot_time = launch_aexad(data_path, epochs, 16, 32, lambda_u, lambda_n, lambda_a, f=f, AE_type='conv',
-                                                    save_intermediate=True, save_path=ret_path,dataset=dataset,loss='aaexad')
+                                                    save_intermediate=False, save_path=ret_path,dataset=dataset,loss='aaexad')
     np.save(open(os.path.join(ret_path, 'aexad_htmaps.npy'), 'wb'), heatmaps)
     np.save(open(os.path.join(ret_path, 'aexad_scores.npy'), 'wb'), scores)
     times.append(tot_time)
