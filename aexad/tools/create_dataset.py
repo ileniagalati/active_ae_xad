@@ -256,16 +256,9 @@ def mvtec(cl, path, n_anom_per_cls, seed=29):
             GT_train.append(np.zeros_like(image, dtype=np.uint8))
             GT.append(np.zeros_like(image, dtype=np.uint8))
             Y.append(0)
-
-
-    # Add normal data to test set
-    f_path = os.path.join(root, 'train', 'good')
-    normal_files_te = os.listdir(f_path)
-    for file in normal_files_te:
-        if file.lower().endswith(('png', 'jpg', 'npy')):
-            image = np.array(Image.open(os.path.join(f_path, file)).convert('RGB').resize((256, 256),Image.NEAREST))
             X_test.append(image)
             GT_test.append(np.zeros_like(image, dtype=np.uint8))
+
 
     outlier_data_dir = os.path.join(root, 'test')
     outlier_classes = os.listdir(outlier_data_dir)
@@ -300,6 +293,7 @@ def mvtec(cl, path, n_anom_per_cls, seed=29):
 
     Y_train = np.zeros(X_train.shape[0])
     Y_test = np.zeros(X_test.shape[0])
+
     return X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT, Y
 
 

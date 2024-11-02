@@ -128,7 +128,6 @@ if __name__ == '__main__':
 
         #query selection
         image_to_save = X_train[Y_train==0][idx[0]]
-
         img_to_save = Image.fromarray(image_to_save.astype(np.uint8))
         img_to_save.save(os.path.join(active_images, img+ext))
         print("dim image: ", image_to_save.shape)
