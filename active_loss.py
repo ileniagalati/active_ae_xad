@@ -14,11 +14,13 @@ class AAEXAD_loss(nn.Module):
 
         def forward(self, input, target, gt, y):
 
+            print("y: ", y)
+
             rec_unlabeled = torch.where(y == 0, torch.sum((input - target) ** 2, dim=(1, 2, 3)), 0)
             rec_normal = torch.where(y == 1, torch.sum((input - target) ** 2, dim=(1, 2, 3)), 0)
             rec_anomalous = torch.where(y == -1, torch.sum((self.f(target) - input) ** 2, dim=(1, 2, 3)), 0)
 
-            print("recs: (u,n,a) ", rec_unlabeled, rec_normal, rec_anomalous)
+            #print("recs: (u,n,a) ", rec_unlabeled, rec_normal, rec_anomalous)
 
             loss_unlabeled = self.lambda_u * rec_unlabeled
             loss_normal = self.lambda_n * rec_normal
