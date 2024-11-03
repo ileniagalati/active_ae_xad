@@ -119,7 +119,6 @@ class Trainer:
         #labels = np.array(labels)
         return heatmaps, scores, gtmaps, labels
 
-    '''
     def train(self, epochs, save_path='', restart_from_scratch=False):
         if isinstance(self.model, Conv_Autoencoder):
             name = 'model_conv'
@@ -170,65 +169,6 @@ class Trainer:
         # Salva i pesi finali dell'iterazione di active learning
         torch.save(self.model.state_dict(), latest_weights)
         print(f"Pesi salvati al termine dell'iterazione: {latest_weights}")
-        '''
-
-    def train(self, epochs, save_path='', restart_from_scratch=False):
-            if isinstance(self.model, Conv_Autoencoder):
-                name = 'model_conv'
-            elif isinstance(self.model, Conv_Autoencoder_f2):
-                name = 'model_conv_f2'
-            elif isinstance(self.model, Deep_Autoencoder):
-                name = 'model_deep'
-            elif isinstance(self.model, Shallow_Autoencoder):
-                name = 'model'
-            elif isinstance(self.model, Conv_Deep_Autoencoder):
-                name = 'model_conv_deep'
-
-            latest_weights = os.path.join(save_path, 'latest_model_weights.pt')
-            if not restart_from_scratch and os.path.exists(latest_weights):
-                self.model.load_state_dict(torch.load(latest_weights))
-                print("starting training from last iteration model weights...")
-            elif restart_from_scratch:
-                self.initialize_model_weights()
-                print("starting training from scratch...")
-
-            self.model.train()
-            for epoch in range(epochs):
-                train_loss = 0.0
-                tbar = tqdm(self.train_loader, disable=self.silent)
-                for i, sample in enumerate(tbar):
-                    image = sample['image']
-                    label = sample['label']
-                    gtmap = sample['gt_label']
-
-                    if self.cuda:
-                        image = image.cuda()
-                        gtmap = gtmap.cuda()
-                        label = label.cuda()
-
-                    output = self.model(image)
-                    loss = self.criterion(output, image, gtmap, label)
-
-                    self.optimizer.zero_grad()
-                    loss.backward()
-
-                    # Stampa i gradienti ad ogni batch
-                    for name, param in self.model.named_parameters():
-                        if param.grad is not None:
-                            print(f'Batch {i}, Gradiente per {name}: {param.grad.data}')
-
-                    self.optimizer.step()
-
-                    train_loss += loss.item()
-                    tbar.set_description('Epoch:%d, Train loss: %.3f' % (epoch, train_loss / (i + 1)))
-
-                # Salva pesi intermedi solo se specificato
-                if self.save_intermediate and (epoch + 1) % 10 == 0:
-                    torch.save(self.model.state_dict(), os.path.join(save_path, f'{name}_{epoch}.pt'))
-
-            # Salva i pesi finali dell'iterazione di active learning
-            torch.save(self.model.state_dict(), latest_weights)
-            print(f"Pesi salvati al termine dell'iterazione: {latest_weights}")
 
 
     def initialize_model_weights(self):
