@@ -163,7 +163,7 @@ class Trainer:
                 tbar.set_description('Epoch:%d, Train loss: %.3f' % (epoch, train_loss / (i + 1)))
 
             # Salva pesi intermedi solo se specificato
-            if self.save_intermediate and (epoch + 1) % 10 == 0:
+            if self.save_intermediate and (epoch + 1) % 50 == 0:
                 torch.save(self.model.state_dict(), os.path.join(save_path, f'{name}_{epoch}.pt'))
 
         # Salva i pesi finali dell'iterazione di active learning
