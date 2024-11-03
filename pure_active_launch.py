@@ -29,16 +29,16 @@ def select_pure_samples(X_train, Y_train, GT_train, scores, purity=0.5):
 
     #creiamo il nuovo dataset
     X_pure = X_train[pure_indices]
-    X_pure.append(X_train[Y_train == 1])
-    X_pure.append(X_train[Y_train == -1])
+    X_pure = np.append(X_pure, X_train[Y_train == 1], axis=0)
+    X_pure = np.append(X_pure, X_train[Y_train == -1], axis=0)
 
     Y_pure = Y_train[pure_indices]
-    Y_pure.append(Y_train[Y_train == 1])
-    Y_pure.append(Y_train[Y_train == -1])
+    Y_pure = np.append(Y_pure, Y_train[Y_train == 1], axis=0)
+    Y_pure = np.append(Y_pure, Y_train[Y_train == -1], axis=0)
 
     GT_pure = GT_train[pure_indices]
-    GT_pure.append(GT_train[Y_train == 1])
-    GT_pure.append(GT_train[Y_train == -1])
+    GT_pure = np.append(GT_pure, GT_train[Y_train == 1], axis=0)
+    GT_pure = np.append(GT_pure, GT_train[Y_train == -1], axis=0)
 
     return X_pure, Y_pure, GT_pure, pure_indices
 
