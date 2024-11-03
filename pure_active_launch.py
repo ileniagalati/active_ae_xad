@@ -93,7 +93,7 @@ if __name__ == '__main__':
     epochs= args.e
     s = args.s
     purity = args.p
-    l=args.l
+    l=bool(args.l)
 
 
     dataset_path= f'datasets/{args.ds}'
