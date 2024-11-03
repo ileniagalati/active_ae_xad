@@ -86,7 +86,7 @@ if __name__ == '__main__':
     parser.add_argument('-e', type=int, help='Epochs to train')
     parser.add_argument('-s', type=int, help='Seed')
     parser.add_argument('-p', type=float, default=0.5, help='Purity parameter for active learning')
-    parser.add_argument('-l', type=float, default=0.5, help='True/False: starting training from scratch?')
+    parser.add_argument('-l', type=float, default=0.5, help='0: starting training from scratch; 1: starting training from last iteration')
     args = parser.parse_args()
 
     b = args.b
