@@ -64,7 +64,7 @@ if __name__ == '__main__':
     np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
 
     #np.save(open(os.path.join(data_path, 'GT.npy'), 'wb'), GT_expert)
-    ret_path = os.path.join('results','output', str(args.ds))
+    ret_path = os.path.join('results','output', str(args.ds), str(s), str(purity) )
     if not os.path.exists(ret_path):
         os.makedirs(ret_path)
     np.save(open(os.path.join(ret_path, 'gt.npy'), 'wb'), GT_expert)
@@ -81,6 +81,7 @@ if __name__ == '__main__':
     print("first lambda_u: ", lambda_u)
 
     for x in range(0, b):
+        print(f"training on {b} iteration")
         heatmaps, scores, _,_, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=str(args.ds),
                                                     lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l)
 
@@ -129,11 +130,7 @@ if __name__ == '__main__':
         #seleziono la frazione alpha di esempi per il training che minimizzano l'anomaly score
         X_pure, Y_pure, GT_pure, pure_indices = select_pure_samples(X_train, Y_train, GT_train,scores,purity)
 
-        print("pure indices: ", pure_indices)
-        print("new dataset len: ", len(pure_indices))
-        print("new X_pure shape: ", X_pure.shape)
-        print("new Y_pure shape: ", Y_pure.shape)
-        print("new GT_pure shape: ", GT_pure.shape)
+        print(f"training on alpha = {purity} fraction of examples: ", len(pure_indices))
 
         np.save(open(os.path.join(data_path, 'X_train.npy'), 'wb'), X_pure)
         np.save(open(os.path.join(data_path, 'Y_train.npy'), 'wb'), Y_pure)
