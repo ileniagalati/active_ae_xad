@@ -25,6 +25,7 @@ if __name__ == '__main__':
     parser.add_argument('-s', type=int, help='Seed')
     parser.add_argument('-p', type=float, default=0.5, help='Purity parameter for active learning')
     parser.add_argument('-l', type=float, default=0.5, help='0: starting training from last iteration; 1: starting training from scratch')
+    parser.add_argument('-r', type=str, default='results', help='Results path')
     args = parser.parse_args()
 
     b = args.b
@@ -32,6 +33,7 @@ if __name__ == '__main__':
     s = args.s
     purity = args.p
     l=bool(args.l)
+    root=args.root
 
 
     dataset_path= f'datasets/{args.ds}'
@@ -43,7 +45,7 @@ if __name__ == '__main__':
         X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT_expert, Y_expert = \
             mvtec(5,dataset_path,10,seed=s)
 
-    data_path = os.path.join('results','test_data', str(args.ds))
+    data_path = os.path.join(root,'test_data', str(args.ds))
     if not os.path.exists(data_path):
         os.makedirs(data_path)
 
@@ -64,7 +66,7 @@ if __name__ == '__main__':
     np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
 
     #np.save(open(os.path.join(data_path, 'GT.npy'), 'wb'), GT_expert)
-    ret_path = os.path.join('results','output', str(args.ds), str(s), str(purity) )
+    ret_path = os.path.join(root,'output', str(args.ds), str(s), str(purity) )
     if not os.path.exists(ret_path):
         os.makedirs(ret_path)
     np.save(open(os.path.join(ret_path, 'gt.npy'), 'wb'), GT_expert)
@@ -85,7 +87,7 @@ if __name__ == '__main__':
         heatmaps, scores, _,_, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=str(args.ds),
                                                     lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l)
 
-        active_images=os.path.join('results',"query",str(args.ds),str(x))
+        active_images=os.path.join(root,"query",str(args.ds),str(x))
         if not os.path.exists(active_images):
             os.makedirs(active_images)
 
@@ -104,7 +106,7 @@ if __name__ == '__main__':
         img_to_save.save(os.path.join(active_images, img+ext))
         print("dim image: ", query.shape)
 
-        mask_images=os.path.join('results',"mask",str(args.ds),str(x))
+        mask_images=os.path.join(root,"mask",str(args.ds),str(x))
         if not os.path.exists(mask_images):
             os.makedirs(mask_images)
 
