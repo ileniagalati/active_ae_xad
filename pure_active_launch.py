@@ -181,7 +181,7 @@ if __name__ == '__main__':
         mask_array = np.array(mask_img)
 
         #aggiornamento del dataset
-        X_train, Y_train, GT_train, X_test, Y_test, GT_test, lambda_u, lambda_n, lambda_a = \
+        X_train, Y_train, GT_train, X_test, Y_test, GT_test = \
             update_datasets(idx[0], mask_array, X_train, Y_train, GT_train)
 
         #seleziono la frazione alpha di esempi per il training che minimizzano l'anomaly score
