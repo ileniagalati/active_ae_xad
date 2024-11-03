@@ -33,7 +33,7 @@ if __name__ == '__main__':
     s = args.s
     purity = args.p
     l=bool(args.l)
-    root=args.root
+    root=args.r
 
 
     dataset_path= f'datasets/{args.ds}'
