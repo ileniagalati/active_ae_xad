@@ -89,8 +89,8 @@ if __name__ == '__main__':
             os.makedirs(active_images)
 
 
-        np.save(open(os.path.join(ret_path, f'aexad_htmaps_{b}.npy'), 'wb'), heatmaps)
-        np.save(open(os.path.join(ret_path, f'aexad_scores_{b}.npy'), 'wb'), scores)
+        np.save(open(os.path.join(ret_path, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps)
+        np.save(open(os.path.join(ret_path, f'aexad_scores_{x}.npy'), 'wb'), scores)
 
         idx = np.argsort(scores[Y_train == 0])[::-1]
 
