@@ -43,9 +43,9 @@ def select_pure_samples(X_train, Y_train, GT_train, scores, purity=0.5):
     return X_pure, Y_pure, GT_pure, pure_indices
 
 # Main training function
-def training_active_aexad(data_path, epochs, dataset, lambda_u, lambda_n, lambda_a):
+def training_active_aexad(data_path, epochs, dataset, lambda_u, lambda_n, lambda_a, l):
     heatmaps, scores, _, _, tot_time = launch_aexad(data_path, epochs, 16, 32, lambda_u, lambda_n, lambda_a, f=f, AE_type='conv',
-                                                    save_intermediate=True, save_path=ret_path, dataset=dataset, loss='aaexad')
+                                                    save_intermediate=True, save_path=ret_path, dataset=dataset, loss='aaexad',restart_from_scratch=l)
     np.save(open(os.path.join(ret_path, 'aexad_htmaps.npy'), 'wb'), heatmaps)
     np.save(open(os.path.join(ret_path, 'aexad_scores.npy'), 'wb'), scores)
     times.append(tot_time)
@@ -82,15 +82,19 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-ds', type=str, help='Dataset to use')
-    parser.add_argument('-budget', type=int, help='Budget')
-    parser.add_argument('-epochs', type=int, help='Epochs to train')
-    parser.add_argument('-seed', type=int, help='Seed')
-    parser.add_argument('-purity', type=float, default=0.5, help='Purity parameter for active learning')
+    parser.add_argument('-b', type=int, help='Budget')
+    parser.add_argument('-e', type=int, help='Epochs to train')
+    parser.add_argument('-s', type=int, help='Seed')
+    parser.add_argument('-p', type=float, default=0.5, help='Purity parameter for active learning')
+    parser.add_argument('-l', type=float, default=0.5, help='True/False: starting training from scratch?')
     args = parser.parse_args()
 
-    b = args.budget
-    s = args.seed
-    purity = args.purity
+    b = args.b
+    epochs= args.e
+    s = args.s
+    purity = args.p
+    l=args.l
+
 
     dataset_path= f'datasets/{args.ds}'
 
@@ -139,8 +143,8 @@ if __name__ == '__main__':
     print("first lambda_u: ", lambda_u)
 
     for x in range(0, b):
-        heatmaps, scores, gtmaps, labels, tot_time = training_active_aexad(data_path,epochs=args.epochs,dataset=str(args.ds),
-                                                                           lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a)
+        heatmaps, scores, gtmaps, labels, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=str(args.ds),
+                                                                           lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, l=l)
 
         active_images=os.path.join('results',"query",str(args.ds),str(x))
         if not os.path.exists(active_images):
@@ -202,7 +206,7 @@ if __name__ == '__main__':
         np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
 
 
-    heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=args.epochs,dataset=str(args.ds),
-                                                             lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a)
+    heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=str(args.ds),
+                                                             lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, l=l)
     np.save(open(os.path.join(ret_path, 'aexad_htmaps_f.npy'), 'wb'), heatmaps)
     np.save(open(os.path.join(ret_path, 'aexad_scores_f.npy'), 'wb'), scores)
