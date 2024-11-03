@@ -35,10 +35,14 @@ if __name__ == '__main__':
     l=bool(args.l)
     root=args.r
 
-    X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT_expert, Y_expert = \
-            mvtec(5,args.ds,10,seed=s)
+    dataset_path = args.ds
+    ds = os.path.basename(dataset_path)
 
-    data_path = os.path.join(root,'test_data', str(args.ds))
+
+    X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT_expert, Y_expert = \
+            mvtec(5,dataset_path,10,seed=s)
+
+    data_path = os.path.join(root,'test_data', ds)
     if not os.path.exists(data_path):
         os.makedirs(data_path)
 
@@ -59,7 +63,7 @@ if __name__ == '__main__':
     np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
 
     #np.save(open(os.path.join(data_path, 'GT.npy'), 'wb'), GT_expert)
-    ret_path = os.path.join(root,'output', str(args.ds), str(s), str(purity) )
+    ret_path = os.path.join(root,'output', ds, str(s), str(purity) )
     if not os.path.exists(ret_path):
         os.makedirs(ret_path)
     np.save(open(os.path.join(ret_path, 'gt.npy'), 'wb'), GT_expert)
@@ -77,10 +81,10 @@ if __name__ == '__main__':
 
     for x in range(0, b):
         print(f"training on {b} iteration")
-        heatmaps, scores, _,_, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=str(args.ds),
+        heatmaps, scores, _,_, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=ds,
                                                     lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l)
 
-        active_images=os.path.join(root,"query",str(args.ds),str(x))
+        active_images=os.path.join(root,"query",ds,str(x))
         if not os.path.exists(active_images):
             os.makedirs(active_images)
 
@@ -99,7 +103,7 @@ if __name__ == '__main__':
         img_to_save.save(os.path.join(active_images, img+ext))
         print("dim image: ", query.shape)
 
-        mask_images=os.path.join(root,"mask",str(args.ds),str(x))
+        mask_images=os.path.join(root,"mask",ds,str(x))
         if not os.path.exists(mask_images):
             os.makedirs(mask_images)
 
@@ -165,7 +169,7 @@ if __name__ == '__main__':
 
 
 
-    heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=str(args.ds),
+    heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=ds,
                                         lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l)
     np.save(open(os.path.join(ret_path, 'aexad_htmaps_f.npy'), 'wb'), heatmaps)
     np.save(open(os.path.join(ret_path, 'aexad_scores_f.npy'), 'wb'), scores)
