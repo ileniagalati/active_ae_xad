@@ -61,10 +61,6 @@ def update_datasets(image_idx, mask_array, X_train, Y_train, GT_train):
         Y_train[image_idx] = 1
         GT_train[image_idx] = mask_array
 
-    n = len(X_train)
-    lambda_u = n / np.sum(Y_train == 0) if np.sum(Y_train == 0) > 0 else 0
-    lambda_n = n / np.sum(Y_train == 1) if np.sum(Y_train == 1) > 0 else 0
-    lambda_a = n / np.sum(Y_train == -1) if np.sum(Y_train == -1) > 0 else 0
 
     print("unlabeled lambda: ", lambda_u)
     print("normal lambda: ", lambda_n)
@@ -74,7 +70,7 @@ def update_datasets(image_idx, mask_array, X_train, Y_train, GT_train):
     Y_test = Y_train
     GT_test = GT_train
 
-    return X_train, Y_train, GT_train, X_test, Y_test, GT_test, lambda_u, lambda_n, lambda_a
+    return X_train, Y_train, GT_train, X_test, Y_test, GT_test
 
 if __name__ == '__main__':
 
@@ -205,6 +201,10 @@ if __name__ == '__main__':
         np.save(open(os.path.join(data_path, 'Y_test.npy'), 'wb'), Y_test)
         np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
 
+        n = len(X_pure)
+        lambda_u = n / np.sum(Y_pure == 0) if np.sum(Y_pure == 0) > 0 else 0
+        lambda_n = n / np.sum(Y_pure == 1) if np.sum(Y_pure == 1) > 0 else 0
+        lambda_a = n / np.sum(Y_pure == -1) if np.sum(Y_pure == -1) > 0 else 0
 
     heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=str(args.ds),
                                                              lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, l=l)
