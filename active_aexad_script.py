@@ -185,7 +185,7 @@ class Trainer:
             print("starting training from last iteration model weights...")
         elif restart_from_scratch:
             self.initialize_model_weights()
-            print("starting training from scratch")
+            print("starting training from scratch...")
 
         self.model.train()
         for epoch in range(epochs):
