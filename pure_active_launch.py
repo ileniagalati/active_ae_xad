@@ -53,7 +53,6 @@ def training_active_aexad(data_path, epochs, dataset, lambda_u, lambda_n, lambda
 
     return heatmaps, scores, _, _, tot_time
 
-# Dataset update function
 def update_datasets(image_idx, mask_array, X_train, Y_train, GT_train):
     if np.sum(mask_array) > 0:
         Y_train[image_idx] = -1
@@ -62,19 +61,20 @@ def update_datasets(image_idx, mask_array, X_train, Y_train, GT_train):
         Y_train[image_idx] = 1
         GT_train[image_idx] = mask_array
 
-    print("unlabeled examples: ", np.sum(Y_train == 0))
-    print("normal examples: ", np.sum(Y_train == 1))
-    print("anomalous examples: ", np.sum(Y_train == -1))
-
-    lambda_u = 1 / np.sum(Y_train == 0) if np.sum(Y_train == 0) > 0 else 0
-    lambda_n = 1 / np.sum(Y_train == 1) if np.sum(Y_train == 1) > 0 else 0
-    lambda_a = 1 / np.sum(Y_train == -1) if np.sum(Y_train == -1) > 0 else 0
+    n = len(X_train)
+    lambda_u = n / np.sum(Y_train == 0) if np.sum(Y_train == 0) > 0 else 0
+    lambda_n = n / np.sum(Y_train == 1) if np.sum(Y_train == 1) > 0 else 0
+    lambda_a = n / np.sum(Y_train == -1) if np.sum(Y_train == -1) > 0 else 0
 
     print("unlabeled lambda: ", lambda_u)
     print("normal lambda: ", lambda_n)
     print("anomalous lambda: ", lambda_a)
 
-    return X_train, Y_train, GT_train, lambda_u, lambda_n, lambda_a
+    X_test = X_train
+    Y_test = Y_train
+    GT_test = GT_train
+
+    return X_train, Y_train, GT_train, X_test, Y_test, GT_test, lambda_u, lambda_n, lambda_a
 
 if __name__ == '__main__':
 
