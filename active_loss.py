@@ -26,6 +26,8 @@ class AAEXAD_loss(nn.Module):
             loss_normal = self.lambda_n * rec_normal
             loss_anomalous = self.lambda_a * rec_anomalous
 
+            print("loss: (u,n,a) ", loss_unlabeled, loss_normal, loss_anomalous)
+
             total_loss = torch.sum(loss_unlabeled + loss_normal + loss_anomalous)
 
             return total_loss
