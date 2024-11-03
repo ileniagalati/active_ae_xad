@@ -152,6 +152,27 @@ if __name__ == '__main__':
         print("normal lambda: ", lambda_n)
         print("anomalous lambda: ", lambda_a)
 
+        n = len(X_pure)
+        n0 = np.sum(Y_pure == 0)
+        n1 = np.sum(Y_pure == 1)
+        n_1 = np.sum(Y_pure == -1)
+
+        lambda_u = n / n0 if n0 > 0 else 0
+        lambda_n = n / n1 if n1 > 0 else 0
+        lambda_a = n / n_1 if n_1 > 0 else 0
+
+        # Normalizza i lambda in modo che sommino a 1
+        lambda_sum = lambda_u + lambda_n + lambda_a
+        lambda_u /= lambda_sum
+        lambda_n /= lambda_sum
+        lambda_a /= lambda_sum
+
+        print("unlabeled lambda normalized: ", lambda_u)
+        print("normal lambda normalized: ", lambda_n)
+        print("anomalous lambda normalized: ", lambda_a)
+
+
+
     heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=str(args.ds),
                                         lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l)
     np.save(open(os.path.join(ret_path, 'aexad_htmaps_f.npy'), 'wb'), heatmaps)
