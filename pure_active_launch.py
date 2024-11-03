@@ -106,6 +106,7 @@ if __name__ == '__main__':
         os.makedirs(data_path)
 
     n_examples=len(X_train)
+
     print("numero di esempi: ",n_examples)
 
     np.save(open(os.path.join(data_path, 'X_train_0.npy'), 'wb'), X_train)
