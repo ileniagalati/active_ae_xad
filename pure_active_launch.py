@@ -14,22 +14,46 @@ import numpy as np
 from aexad.tools.utils import plot_image_tosave, plot_heatmap_tosave
 
 def f(x):
-    return 1-x
+    return 1 - x
 
-def training_active_aexad(data_path,epochs,dataset,lambda_u, lambda_n, lambda_a):
-    heatmaps, scores, gtmaps, labels, tot_time = launch_aexad(data_path, epochs, 16, 32, lambda_u, lambda_n, lambda_a, f=f, AE_type='conv',
-                                                    save_intermediate=True , save_path=ret_path,dataset=dataset,loss='aaexad')
+def select_pure_samples(X_train, Y_train, GT_train, scores, purity=0.5):
+    '''
+    Funzione che crea il nuovo dataset di addestramento in base alla frazione alpha=purity
+    '''
+    #indici di esempi unlabeled
+    unlabeled_idx = np.where(Y_train == 0)[0]
+
+    #indici selezionati (frazione alpha)
+    selected_idx = np.argsort(scores[unlabeled_idx])[:int(purity * len(unlabeled_idx))]
+    pure_indices = unlabeled_idx[selected_idx]
+
+    #creiamo il nuovo dataset
+    X_pure = X_train[pure_indices]
+    X_pure.append(X_train[Y_train == 1])
+    X_pure.append(X_train[Y_train == -1])
+
+    Y_pure = Y_train[pure_indices]
+    Y_pure.append(Y_train[Y_train == 1])
+    Y_pure.append(Y_train[Y_train == -1])
+
+    GT_pure = GT_train[pure_indices]
+    GT_pure.append(GT_train[Y_train == 1])
+    GT_pure.append(GT_train[Y_train == -1])
+
+    return X_pure, Y_pure, GT_pure, pure_indices
+
+# Main training function
+def training_active_aexad(data_path, epochs, dataset, lambda_u, lambda_n, lambda_a):
+    heatmaps, scores, _, _, tot_time = launch_aexad(data_path, epochs, 16, 32, lambda_u, lambda_n, lambda_a, f=f, AE_type='conv',
+                                                    save_intermediate=True, save_path=ret_path, dataset=dataset, loss='aaexad')
     np.save(open(os.path.join(ret_path, 'aexad_htmaps.npy'), 'wb'), heatmaps)
     np.save(open(os.path.join(ret_path, 'aexad_scores.npy'), 'wb'), scores)
     times.append(tot_time)
     np.save(open(os.path.join(ret_path, 'times.npy'), 'wb'), np.array(times))
 
-    return heatmaps, scores, gtmaps, labels, tot_time
+    return heatmaps, scores, _, _, tot_time
 
-def run_mask_generation(from_path,to_path):
-    subprocess.run(["python3", "MaskGenerator.py" ,"-from_path",from_path,"-to_path",to_path])
-
-
+# Dataset update function
 def update_datasets(image_idx, mask_array, X_train, Y_train, GT_train):
     if np.sum(mask_array) > 0:
         Y_train[image_idx] = -1
@@ -38,23 +62,21 @@ def update_datasets(image_idx, mask_array, X_train, Y_train, GT_train):
         Y_train[image_idx] = 1
         GT_train[image_idx] = mask_array
 
-    n = len(X_train)
-    lambda_u = n / np.sum(Y_train == 0) if np.sum(Y_train == 0) > 0 else 0
-    lambda_n = n / np.sum(Y_train == 1) if np.sum(Y_train == 1) > 0 else 0
-    lambda_a = n / np.sum(Y_train == -1) if np.sum(Y_train == -1) > 0 else 0
+    print("unlabeled examples: ", np.sum(Y_train == 0))
+    print("normal examples: ", np.sum(Y_train == 1))
+    print("anomalous examples: ", np.sum(Y_train == -1))
+
+    lambda_u = 1 / np.sum(Y_train == 0) if np.sum(Y_train == 0) > 0 else 0
+    lambda_n = 1 / np.sum(Y_train == 1) if np.sum(Y_train == 1) > 0 else 0
+    lambda_a = 1 / np.sum(Y_train == -1) if np.sum(Y_train == -1) > 0 else 0
 
     print("unlabeled lambda: ", lambda_u)
     print("normal lambda: ", lambda_n)
     print("anomalous lambda: ", lambda_a)
 
-    X_test = X_train
-    Y_test = Y_train
-    GT_test = GT_train
-
-    return X_train, Y_train, GT_train, X_test, Y_test, GT_test, lambda_u, lambda_n, lambda_a
+    return X_train, Y_train, GT_train, lambda_u, lambda_n, lambda_a
 
 if __name__ == '__main__':
-
 
     print("is cuda available: ",torch.cuda.is_available())
 
@@ -86,6 +108,10 @@ if __name__ == '__main__':
     n_examples=len(X_train)
     print("numero di esempi: ",n_examples)
 
+    np.save(open(os.path.join(data_path, 'X_train_0.npy'), 'wb'), X_train)
+    np.save(open(os.path.join(data_path, 'Y_train_0.npy'), 'wb'), Y_train)
+    np.save(open(os.path.join(data_path, 'GT_train_0.npy'), 'wb'), GT_train)
+
     np.save(open(os.path.join(data_path, 'X_train.npy'), 'wb'), X_train)
     np.save(open(os.path.join(data_path, 'Y_train.npy'), 'wb'), Y_train)
     np.save(open(os.path.join(data_path, 'GT_train.npy'), 'wb'), GT_train)
@@ -94,7 +120,7 @@ if __name__ == '__main__':
     np.save(open(os.path.join(data_path, 'Y_test.npy'), 'wb'), Y_test)
     np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
 
-    np.save(open(os.path.join(data_path, 'GT.npy'), 'wb'), GT_expert)
+    #np.save(open(os.path.join(data_path, 'GT.npy'), 'wb'), GT_expert)
     ret_path = os.path.join('results','output', str(args.ds))
     if not os.path.exists(ret_path):
         os.makedirs(ret_path)
@@ -112,9 +138,8 @@ if __name__ == '__main__':
     print("first lambda_u: ", lambda_u)
 
     for x in range(0, b):
-
         heatmaps, scores, gtmaps, labels, tot_time = training_active_aexad(data_path,epochs=args.epochs,dataset=str(args.ds),
-                                                                 lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a)
+                                                                           lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a)
 
         active_images=os.path.join('results',"query",str(args.ds),str(x))
         if not os.path.exists(active_images):
@@ -158,14 +183,22 @@ if __name__ == '__main__':
         X_train, Y_train, GT_train, X_test, Y_test, GT_test, lambda_u, lambda_n, lambda_a = \
             update_datasets(idx[0], mask_array, X_train, Y_train, GT_train)
 
-        np.save(open(os.path.join(data_path, 'X_train.npy'), 'wb'), X_train)
-        np.save(open(os.path.join(data_path, 'Y_train.npy'), 'wb'), Y_train)
-        np.save(open(os.path.join(data_path, 'GT_train.npy'), 'wb'), GT_train)
+        #seleziono la frazione alpha di esempi per il training che minimizzano l'anomaly score
+        X_pure, Y_pure, GT_pure, pure_indices = select_pure_samples(X_train, Y_train, GT_train,scores,purity)
+
+        print("pure indices: ", pure_indices)
+        print("new dataset len: ", len(pure_indices))
+        print("new X_pure shape: ", X_pure.shape)
+        print("new Y_pure shape: ", Y_pure.shape)
+        print("new GT_pure shape: ", GT_pure.shape)
+
+        np.save(open(os.path.join(data_path, 'X_train.npy'), 'wb'), X_pure)
+        np.save(open(os.path.join(data_path, 'Y_train.npy'), 'wb'), Y_pure)
+        np.save(open(os.path.join(data_path, 'GT_train.npy'), 'wb'), GT_pure)
 
         np.save(open(os.path.join(data_path, 'X_test.npy'), 'wb'), X_test)
         np.save(open(os.path.join(data_path, 'Y_test.npy'), 'wb'), Y_test)
         np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
-
 
 
     heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=args.epochs,dataset=str(args.ds),
