@@ -182,10 +182,10 @@ class Trainer:
         latest_weights = os.path.join(save_path, 'latest_model_weights.pt')
         if not restart_from_scratch and os.path.exists(latest_weights):
             self.model.load_state_dict(torch.load(latest_weights))
-            print("Caricati i pesi dall'iterazione precedente.")
+            print("starting training from last iteration model weights...")
         elif restart_from_scratch:
             self.initialize_model_weights()
-            print("Riavvio dei pesi del modello.")
+            print("starting training from scratch")
 
         self.model.train()
         for epoch in range(epochs):
