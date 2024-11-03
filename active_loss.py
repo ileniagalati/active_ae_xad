@@ -16,8 +16,8 @@ class AAEXAD_loss(nn.Module):
 
             #print("y: ", y)
 
-            print("input: ", input)
-            print("target: ", target)
+            #print("input: ", input)
+            #print("target: ", target)
 
             rec_unlabeled = torch.where(y == 0, torch.sum((input - target) ** 2, dim=(1, 2, 3)), 0)
             rec_normal = torch.where(y == 1, torch.sum((input - target) ** 2, dim=(1, 2, 3)), 0)
