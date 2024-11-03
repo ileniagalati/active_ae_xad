@@ -35,15 +35,8 @@ if __name__ == '__main__':
     l=bool(args.l)
     root=args.r
 
-
-    dataset_path= f'datasets/{args.ds}'
-
-    if args.ds == 'brain':
-        X_train, Y_train, GT_train, X_test, Y_test, GT_test = \
-            load_brainMRI_dataset(dataset_path)
-    if args.ds == 'mvtec':
-        X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT_expert, Y_expert = \
-            mvtec(5,dataset_path,10,seed=s)
+    X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT_expert, Y_expert = \
+            mvtec(5,args.ds,10,seed=s)
 
     data_path = os.path.join(root,'test_data', str(args.ds))
     if not os.path.exists(data_path):
