@@ -156,9 +156,9 @@ if __name__ == '__main__':
         ext=".png"
 
         #query selection
-        query = X_train[Y_train==0][idx[0]]
-        query = Image.fromarray(query.astype(np.uint8))
-        query.save(os.path.join(active_images, img+ext))
+        query = X_train[Y_train == 0][idx[0]]
+        img_to_save = Image.fromarray(query.astype(np.uint8))
+        img_to_save.save(os.path.join(active_images, img+ext))
         print("dim image: ", query.shape)
 
         mask_images=os.path.join('results',"mask",str(args.ds),str(x))
