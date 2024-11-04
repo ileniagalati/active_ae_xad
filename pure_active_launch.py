@@ -24,7 +24,7 @@ if __name__ == '__main__':
     parser.add_argument('-e', type=int, help='Epochs to train')
     parser.add_argument('-s', type=int, help='Seed')
     parser.add_argument('-p', type=float, default=0.5, help='Purity parameter for active learning')
-    parser.add_argument('-l', type=float, default=0.5, help='0: starting training from last iteration; 1: starting training from scratch')
+    parser.add_argument('-l', type=float, default=1, help='0: starting training from last iteration; 1: starting training from scratch')
     parser.add_argument('-r', type=str, default='results', help='Results path')
     args = parser.parse_args()
 
@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
 
     X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT_expert, Y_expert = \
-            mvtec(5,dataset_path,10,seed=s)
+            mvtec(5,dataset_path,5,seed=s)
 
     data_path = os.path.join(root,'test_data', ds)
     if not os.path.exists(data_path):
@@ -61,9 +61,8 @@ if __name__ == '__main__':
     np.save(open(os.path.join(data_path, 'X_test.npy'), 'wb'), X_test)
     np.save(open(os.path.join(data_path, 'Y_test.npy'), 'wb'), Y_test)
     np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
-
-    #np.save(open(os.path.join(data_path, 'GT.npy'), 'wb'), GT_expert)
-    ret_path = os.path.join(root,'output', ds, str(s), str(purity) )
+    b=0
+    ret_path = os.path.join(root,'output', ds, str(s), str(purity), b)
     if not os.path.exists(ret_path):
         os.makedirs(ret_path)
     np.save(open(os.path.join(ret_path, 'gt.npy'), 'wb'), GT_expert)
@@ -80,9 +79,9 @@ if __name__ == '__main__':
     print("first lambda_u: ", lambda_u)
 
     for x in range(0, b):
-        print(f"training on {b} iteration")
+        print(f"training on {x} iteration")
         heatmaps, scores, _,_, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=ds,
-                                                    lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l)
+                                        lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l)
 
         active_images=os.path.join(root,"query",ds,str(x))
         if not os.path.exists(active_images):
@@ -101,7 +100,7 @@ if __name__ == '__main__':
         query = X_train[Y_train == 0][idx[0]]
         img_to_save = Image.fromarray(query.astype(np.uint8))
         img_to_save.save(os.path.join(active_images, img+ext))
-        print("dim image: ", query.shape)
+        #print("dim image: ", query.shape)
 
         mask_images=os.path.join(root,"mask",ds,str(x))
         if not os.path.exists(mask_images):
@@ -139,15 +138,16 @@ if __name__ == '__main__':
         np.save(open(os.path.join(data_path, 'Y_test.npy'), 'wb'), Y_test)
         np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
 
+        #update dei valori dei pesi della loss e normalizzazione degli stessi, sum=1
         n = len(X_pure)
         lambda_u = n / np.sum(Y_pure == 0) if np.sum(Y_pure == 0) > 0 else 0
         lambda_n = n / np.sum(Y_pure == 1) if np.sum(Y_pure == 1) > 0 else 0
         lambda_a = n / np.sum(Y_pure == -1) if np.sum(Y_pure == -1) > 0 else 0
-
+        '''
         print("unlabeled lambda: ", lambda_u)
         print("normal lambda: ", lambda_n)
         print("anomalous lambda: ", lambda_a)
-
+        '''
         n = len(X_pure)
         n0 = np.sum(Y_pure == 0)
         n1 = np.sum(Y_pure == 1)
@@ -157,18 +157,17 @@ if __name__ == '__main__':
         lambda_n = n / n1 if n1 > 0 else 0
         lambda_a = n / n_1 if n_1 > 0 else 0
 
-        # Normalizza i lambda in modo che sommino a 1
         lambda_sum = lambda_u + lambda_n + lambda_a
         lambda_u /= lambda_sum
         lambda_n /= lambda_sum
         lambda_a /= lambda_sum
-
+        '''
         print("unlabeled lambda normalized: ", lambda_u)
         print("normal lambda normalized: ", lambda_n)
         print("anomalous lambda normalized: ", lambda_a)
+        '''
 
-
-
+    #training finale
     heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=ds,
                                         lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l)
     np.save(open(os.path.join(ret_path, 'aexad_htmaps_f.npy'), 'wb'), heatmaps)
