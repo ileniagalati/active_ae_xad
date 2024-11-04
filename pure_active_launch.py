@@ -62,7 +62,7 @@ if __name__ == '__main__':
     np.save(open(os.path.join(data_path, 'Y_test.npy'), 'wb'), Y_test)
     np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
     b=0
-    ret_path = os.path.join(root,'output', ds, str(s), str(purity), b)
+    ret_path = os.path.join(root,'output', ds, str(s), str(purity), str(b))
     if not os.path.exists(ret_path):
         os.makedirs(ret_path)
     np.save(open(os.path.join(ret_path, 'gt.npy'), 'wb'), GT_expert)
