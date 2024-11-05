@@ -206,8 +206,6 @@ def table(folder_path,output_path):
         plt.savefig(output_path, bbox_inches='tight')
         plt.close(fig)
 
-        print(f"Tabella di immagini salvata in {output_path}")
-
 folder_path="mvtec_results/weights/1.0/2/logs/plot/1"
 output_path="mvtec_results/weights/1.0/2/logs/plot/1"
 table(folder_path,output_path)
