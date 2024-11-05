@@ -133,45 +133,39 @@ import os
 import matplotlib.pyplot as plt
 
 
-def plot_iteration_results(path, model_type):
-    # Traverse through each subdirectory in root_path
-    for subdir in os.listdir(root_path):
-        sub_path = os.path.join(root_path, subdir)
+def plot_iteration_results(path, it, model_type):
+    for i in range(1,it+1):
+        subpath=os.path.join(path, "plot",str(i))
+        if not os.path.exists(subpath):
+            os.makedirs(subpath)
+        if i==it+1:
+            i="f"
+        GT = np.load(open("mvtec_results/weights/1.0/2/output/gt.npy"), 'rb')
+        Y = np.load(open("mvtec_results/weights/1.0/2/output/labels.npy"), 'rb')
 
-        # Check if it is a directory
-        if os.path.isdir(sub_path):
-            # Process each .npy file within the subdirectory
-            for filename in sorted(os.listdir(sub_path)):
-                if filename.endswith(".npy"):
-                    file_path = os.path.join(sub_path, filename)
+        htmaps_aexad = np.load(open(os.path.join(path, str(i), f'aexad_htmaps_{i}.npy'), 'rb'))
+        X_test = np.load(open(os.path.join(path, str(i), 'X_test.npy'), 'rb'))
 
-                    # Load the .npy file
-                    data = np.load(file_path)
+        print (len(X_test))
+        print(len(Y))
 
-                    # Plot the data (adjust for 1D or 2D data)
-                    plt.figure(figsize=(8, 6))
-                    if data.ndim == 1:
-                        plt.plot(data)
-                        plt.title(f"{filename} - Line Plot")
-                    elif data.ndim == 2:
-                        plt.imshow(data, cmap='viridis', aspect='auto')
-                        plt.colorbar()
-                        plt.title(f"{filename} - Heatmap")
-                    else:
-                        print(f"Skipping {filename}: Unsupported data dimensions ({data.ndim}).")
-                        continue
+        for x in range(0, len(X_test)):
+            if len(X_test[Y==1]>0):
+                image = X_test[Y==1][x]
+                image = image.transpose(2, 0, 1)
+                plot_image(image)
+                plt.savefig(os.path.join(subpath, f"img_{i}_{x}.png"))
+                plot_heatmap(htmaps_aexad[Y == 1][x])
+                plt.savefig(os.path.join(subpath, f"ht_{i}_{x}.png"))
+                gt = GT[Y == 1][x]
+                gt = gt.transpose(2, 0, 1)
+                plot_heatmap(gt)
+                plt.savefig(os.path.join(subpath, f"gt_{i}_{x}.png"))
 
-                    plt.xlabel('Index')
-                    plt.ylabel('Value')
 
-                    # Save the plot in the same directory as the .npy file
-                    plot_filename = filename.replace(".npy", ".png")
-                    plot_path = os.path.join(sub_path, plot_filename)
-                    plt.savefig(plot_path)
-                    plt.close()  # Close the plot to free memory
+    plt.show()
 
-# Call the function with your path and model type
-plot_iteration_results("mvtec_results/scratch/1.0/2/logs", 'aaexad')
+plot_iteration_results("mvtec_results/weights/1.0/2/logs", 10,'aaexad')
 
 '''
 ret_path = "mvtec_results/weights/0.5/29"
@@ -184,7 +178,5 @@ X_test=np.load(open(os.path.join(ret_path, "test_data", 'X_test.npy'), 'rb'))
 if not os.path.exists(os.path.join(ret_path,"plot")):
     os.makedirs(os.path.join(ret_path,"plot"))
 plot_results_anom_top(ret_path,'aaexad')
-'''
-path="mvtec_results/scratch/1.0/2/logs"
 
-plot_iteration_results(path,'aaexad')
+'''
