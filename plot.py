@@ -2,10 +2,14 @@ from operator import index
 from aexad.tools.create_dataset import square, square_diff, mvtec
 import matplotlib
 matplotlib.use('Agg')
+#%matplotlib inline
+
 import matplotlib.pyplot as plt
+# Resto del tuo codice
+
+
 from kornia.filters import gaussian_blur2d
 import torch
-
 def weighted_htmaps(htmaps, n_pixels=1):
     w_htmaps = np.empty_like(htmaps)
     for k in range(len(htmaps)):
@@ -80,26 +84,27 @@ import matplotlib.pyplot as plt
 
 def plot_results_anom(path, method):
 
-    if  method == 'aaexad':
+    if method == 'aaexad':
         idx = np.argsort(scores_aexad[Y_test == 1])
 
     plt.title(f'{method}')
 
-    subplot_per_row = 3
-    examples=5
+    # Apply Gaussian blur to heatmaps
+    htmaps_aexad_f = gaussian_blur2d(torch.from_numpy(htmaps_aexad), kernel_size=(15, 15), sigma=(4, 4))
+
+    # Set number of examples to show
+    examples = 5
     for i in range(examples):
-        plt.subplot(5, subplot_per_row, (i*subplot_per_row)+1)
-        plot_image(X_test[Y_test==1][idx[i]])
-
-        plt.subplot(examples, subplot_per_row, (i*subplot_per_row)+2)
-
-        plt.title('AEXAD')
-        plot_heatmap(htmaps_aexad[Y_test==1][idx[i]])
-        plt.subplot(examples, subplot_per_row, (i*subplot_per_row)+3)
-
-        plot_heatmap(GT_test[Y_test==1][idx[i]])
-
-    plt.show()
+        image = X_test[Y_test == 1][idx[i]]
+        image = image.transpose(2, 0, 1)
+        plot_image(image)
+        plt.savefig(os.path.join(ret_path, "plot", f"img_{i}.png"))
+        plot_heatmap(htmaps_aexad_f[Y_test == 1][idx[i]])
+        plt.savefig(os.path.join(ret_path, "plot", f"ht_{i}.png"))
+        gt = GT_test[Y_test == 1][idx[i]]
+        gt = gt.transpose(2, 0, 1)
+        plot_heatmap(gt)
+        plt.savefig(os.path.join(ret_path, "plot", f"gt_{i}.png"))
 
 def plot_results_anom_top(path, method):
 
@@ -108,28 +113,29 @@ def plot_results_anom_top(path, method):
 
     plt.title(f'{method}')
 
-    # Apply Gaussian blur to heatmaps
     htmaps_aexad_f = gaussian_blur2d(torch.from_numpy(htmaps_aexad), kernel_size=(15, 15), sigma=(4, 4))
 
-    # Set number of examples to show
-    examples = 2
+    examples = 5
     for i in range(examples):
         image = X_test[Y_test == 1][idx[i]]
         image = image.transpose(2,0,1)
         plot_image(image)
-        plt.show()
+        plt.savefig(os.path.join(ret_path,"plot",f"img_{i}.png"))
         plot_heatmap(htmaps_aexad_f[Y_test == 1][idx[i]])
-        plt.show()
+        plt.savefig(os.path.join(ret_path,"plot",f"ht_{i}.png"))
         gt=GT_test[Y_test == 1][idx[i]]
         gt = gt.transpose(2,0,1)
         plot_heatmap(gt)
-        plt.show()
+        plt.savefig(os.path.join(ret_path,"plot",f"gt_{i}.png"))
 
-ret_path = "results/output/mvtec"
-data = "results/test_data/mvtec"
-GT_test = np.load(open(os.path.join(ret_path, 'gt.npy'), 'rb'))
-Y_test = np.load(open(os.path.join(ret_path, 'labels.npy'), 'rb'))
-htmaps_aexad = np.load(open(os.path.join(ret_path, 'aexad_htmaps_f.npy'), 'rb'))
-scores_aexad = np.load(open(os.path.join(ret_path, 'aexad_scores_f.npy'), 'rb'))
-X_test=np.load(open(os.path.join(data, 'X_test.npy'), 'rb'))
+ret_path = "mvtec_results/weights/0.5/29"
+GT_test = np.load(open(os.path.join(ret_path, "output", 'gt.npy'), 'rb'))
+Y_test = np.load(open(os.path.join(ret_path, "output", 'labels.npy'), 'rb'))
+htmaps_aexad = np.load(open(os.path.join(ret_path, "output",'aexad_htmaps_f.npy'), 'rb'))
+scores_aexad = np.load(open(os.path.join(ret_path, "output",'aexad_scores_f.npy'), 'rb'))
+X_test=np.load(open(os.path.join(ret_path, "test_data", 'X_test.npy'), 'rb'))
+
+if not os.path.exists(os.path.join(ret_path,"plot")):
+    os.makedirs(os.path.join(ret_path,"plot"))
 plot_results_anom_top(ret_path,'aaexad')
+

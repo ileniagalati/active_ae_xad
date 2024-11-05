@@ -42,7 +42,13 @@ if __name__ == '__main__':
     X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT_expert, Y_expert = \
             mvtec(5,dataset_path,5,seed=s)
 
-    data_path = os.path.join(root,'test_data', ds)
+    if l:
+        c="scratch"
+    else:
+        c="weights"
+    ret_path = os.path.join(root,c, str(purity), str(s))
+
+    data_path = os.path.join(ret_path,'test_data',str(0))
     if not os.path.exists(data_path):
         os.makedirs(data_path)
 
@@ -62,13 +68,14 @@ if __name__ == '__main__':
     np.save(open(os.path.join(data_path, 'Y_test.npy'), 'wb'), Y_test)
     np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
 
-    ret_path = os.path.join(root,'output', ds, str(s), str(purity))
-    if not os.path.exists(ret_path):
-        os.makedirs(ret_path)
-    np.save(open(os.path.join(ret_path, 'gt.npy'), 'wb'), GT_expert)
-    np.save(open(os.path.join(ret_path, 'labels.npy'), 'wb'), Y_expert)
 
-    pickle.dump(args, open(os.path.join(ret_path, 'args'), 'wb'))
+    o=os.path.join(ret_path,"output")
+    if not os.path.exists(o):
+        os.makedirs(o)
+    np.save(open(os.path.join(o, 'gt.npy'), 'wb'), GT_expert)
+    np.save(open(os.path.join(o, 'labels.npy'), 'wb'), Y_expert)
+
+    pickle.dump(args, open(os.path.join(o, 'args'), 'wb'))
 
     times = []
 
@@ -83,13 +90,13 @@ if __name__ == '__main__':
         heatmaps, scores, _,_, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=ds,
                                         lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l)
 
-        active_images=os.path.join(root,"query",ds,str(x))
+        active_images=os.path.join(ret_path,"query",str(x))
         if not os.path.exists(active_images):
             os.makedirs(active_images)
 
 
-        np.save(open(os.path.join(ret_path, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps)
-        np.save(open(os.path.join(ret_path, f'aexad_scores_{x}.npy'), 'wb'), scores)
+        np.save(open(os.path.join(o, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps)
+        np.save(open(os.path.join(o, f'aexad_scores_{x}.npy'), 'wb'), scores)
 
         idx = np.argsort(scores[Y_train == 0])[::-1]
 
@@ -102,7 +109,7 @@ if __name__ == '__main__':
         img_to_save.save(os.path.join(active_images, img+ext))
         #print("dim image: ", query.shape)
 
-        mask_images=os.path.join(root,"mask",ds,str(x))
+        mask_images=os.path.join(ret_path,"mask",str(x))
         if not os.path.exists(mask_images):
             os.makedirs(mask_images)
 
@@ -121,7 +128,6 @@ if __name__ == '__main__':
         mask_img = Image.open(to_path)
         mask_array = np.array(mask_img)
 
-        #aggiornamento del dataset
         X_train, Y_train, GT_train, X_test, Y_test, GT_test = \
             update_datasets(idx[0], mask_array, X_train, Y_train, GT_train)
 
@@ -161,14 +167,14 @@ if __name__ == '__main__':
         lambda_u /= lambda_sum
         lambda_n /= lambda_sum
         lambda_a /= lambda_sum
-        '''
+
         print("unlabeled lambda normalized: ", lambda_u)
         print("normal lambda normalized: ", lambda_n)
         print("anomalous lambda normalized: ", lambda_a)
-        '''
+
 
     #training finale
     heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=ds,
                                         lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l)
-    np.save(open(os.path.join(ret_path, 'aexad_htmaps_f.npy'), 'wb'), heatmaps)
-    np.save(open(os.path.join(ret_path, 'aexad_scores_f.npy'), 'wb'), scores)
+    np.save(open(os.path.join(o, 'aexad_htmaps_f.npy'), 'wb'), heatmaps)
+    np.save(open(os.path.join(o, 'aexad_scores_f.npy'), 'wb'), scores)

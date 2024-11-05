@@ -168,11 +168,10 @@ class Trainer:
 
         # Salva i pesi finali dell'iterazione di active learning
         torch.save(self.model.state_dict(), latest_weights)
-        print(f"Pesi salvati al termine dell'iterazione: {latest_weights}")
+        print(f"saving weights: {latest_weights}")
 
 
     def initialize_model_weights(self):
-        # Funzione per ri-inizializzare i pesi del modello, utile per restart_from_scratch=True
         for layer in self.model.modules():
             if hasattr(layer, 'reset_parameters'):
                 layer.reset_parameters()

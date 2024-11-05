@@ -28,7 +28,6 @@ def select_pure_samples(X_train, Y_train, GT_train, scores, purity=0.5):
 
     return X_pure, Y_pure, GT_pure, pure_indices
 
-# Main training function
 def training_active_aexad(data_path, epochs, dataset, lambda_u, lambda_n, lambda_a, ret_path, times, l):
     heatmaps, scores, _, _, tot_time = launch_aexad(data_path, epochs, 16, 32, lambda_u, lambda_n, lambda_a, f=f, AE_type='conv',
                                                     save_intermediate=True, save_path=ret_path, dataset=dataset, loss='aaexad', restart_from_scratch=l)

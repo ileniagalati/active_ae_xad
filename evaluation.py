@@ -9,12 +9,13 @@ ds="mvtec"
 htmap_stats = []
 det_stats = []
 
-ret_path = os.path.join('results/output', ds)
-GT = np.load(open(os.path.join(ret_path, 'gt.npy'), 'rb'))
-Y = np.load(open(os.path.join(ret_path, 'labels.npy'), 'rb'))
-Y_test = np.load(open(os.path.join('results/test_data', ds, 'Y_test.npy'), 'rb'))
-htmaps_aexad = np.load(open(os.path.join(ret_path, 'aexad_htmaps_f.npy'), 'rb'))
-scores_aexad = np.load(open(os.path.join(ret_path, 'aexad_scores_f.npy'), 'rb'))
+ret_path = "mvtec_results/scratch/0.5/29"
+GT = np.load(open(os.path.join(ret_path,"output", 'gt.npy'), 'rb'))
+Y = np.load(open(os.path.join(ret_path,"output", 'labels.npy'), 'rb'))
+Y_test = np.load(open(os.path.join(ret_path,'test_data', 'Y_test.npy'), 'rb'))
+
+htmaps_aexad = np.load(open(os.path.join(ret_path,"output", 'aexad_htmaps_f.npy'), 'rb'))
+scores_aexad = np.load(open(os.path.join(ret_path,"output", 'aexad_scores_f.npy'), 'rb'))
 
 #serve sistemare la size delle gt
 gt_resized = np.zeros((GT.shape[0], 3, 256, 256), dtype=np.uint8)

@@ -244,9 +244,7 @@ def mvtec(cl, path, n_anom_per_cls, seed=29):
     GT = []
     Y=[]
 
-    #img_size = (256, 256)  # Define the target size for resizing
-
-    # Add normal data to train set
+    #normal data
     f_path = os.path.join(root, 'train', 'good')
     normal_files_tr = os.listdir(f_path)
     for file in normal_files_tr:
@@ -259,7 +257,7 @@ def mvtec(cl, path, n_anom_per_cls, seed=29):
             X_test.append(image)
             GT_test.append(np.zeros_like(image, dtype=np.uint8))
 
-
+    #anomalous data
     outlier_data_dir = os.path.join(root, 'test')
     outlier_classes = os.listdir(outlier_data_dir)
     for cl_a in outlier_classes:
