@@ -140,13 +140,13 @@ def plot_iteration_results(path, it, model_type):
             os.makedirs(subpath)
         if i==it+1:
             i="f"
-        GT = np.load(open(os.path.join("mvtec_results/weights/1.0/2", "output", 'gt.npy'), 'rb'))
-        Y = np.load(open(os.path.join("mvtec_results/weights/1.0/2", "output", 'labels.npy'), 'rb'))
+        GT = np.load(open("mvtec_results/weights/1.0/2/output/gt.npy"), 'rb')
+        Y = np.load(open("mvtec_results/weights/1.0/2/output/labels.npy"), 'rb')
 
         htmaps_aexad = np.load(open(os.path.join(path, str(i), f'aexad_htmaps_{i}.npy'), 'rb'))
         X_test = np.load(open(os.path.join(path, str(i), 'X_test.npy'), 'rb'))
 
-        print(len(X_test))
+        print (len(X_test))
         print(len(Y))
 
         for x in range(0, len(X_test)):
@@ -165,7 +165,52 @@ def plot_iteration_results(path, it, model_type):
 
     plt.show()
 
-plot_iteration_results("mvtec_results/weights/1.0/2/logs", 1,'aaexad')
+plot_iteration_results("mvtec_results/weights/1.0/2/logs", 10,'aaexad')
+
+
+import os
+import matplotlib.pyplot as plt
+import cv2  # Assicurati di avere OpenCV installato: pip install opencv-python
+
+def table(folder_path,output_path):
+        folder_path = folder_path
+
+        img_files = sorted([f for f in os.listdir(folder_path) if f.startswith('img')])
+        ht_files = sorted([f for f in os.listdir(folder_path) if f.startswith('ht')])
+        gt_files = sorted([f for f in os.listdir(folder_path) if f.startswith('gt')])
+
+        img_list = [cv2.imread(os.path.join(folder_path, f)) for f in img_files]
+        ht_list = [cv2.imread(os.path.join(folder_path, f)) for f in ht_files]
+        gt_list = [cv2.imread(os.path.join(folder_path, f)) for f in gt_files]
+
+        img_list = [cv2.cvtColor(img, cv2.COLOR_BGR2RGB) for img in img_list]
+        ht_list = [cv2.cvtColor(img, cv2.COLOR_BGR2RGB) for img in ht_list]
+        gt_list = [cv2.cvtColor(img, cv2.COLOR_BGR2RGB) for img in gt_list]
+
+        n_cols = max(len(img_list), len(ht_list), len(gt_list))
+
+        fig, axs = plt.subplots(3, n_cols, figsize=(3 * n_cols, 9))
+
+        for col in range(n_cols):
+            if col < len(img_list):
+                axs[0, col].imshow(img_list[col])
+                axs[0, col].axis('off')
+            if col < len(ht_list):
+                axs[1, col].imshow(ht_list[col])
+                axs[1, col].axis('off')
+            if col < len(gt_list):
+                axs[2, col].imshow(gt_list[col])
+                axs[2, col].axis('off')
+
+        output_path = output_path
+        plt.savefig(output_path, bbox_inches='tight')
+        plt.close(fig)
+
+        print(f"Tabella di immagini salvata in {output_path}")
+
+folder_path="mvtec_results/weights/1.0/2/logs/plot/1"
+output_path="mvtec_results/weights/1.0/2/logs/plot/1"
+table(folder_path,output_path)
 
 '''
 ret_path = "mvtec_results/weights/0.5/29"

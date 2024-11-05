@@ -4,9 +4,4 @@
     <option name="sdkName" value="Python 3.10 (active_ae_xad)" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.10" project-jdk-type="Python SDK" />
-  <component name="SwUserDefinedSpecifications">
-    <option name="specTypeByUrl">
-      <map />
-    </option>
-  </component>
 </project>
