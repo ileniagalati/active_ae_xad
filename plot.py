@@ -128,6 +128,52 @@ def plot_results_anom_top(path, method):
         plot_heatmap(gt)
         plt.savefig(os.path.join(ret_path,"plot",f"gt_{i}.png"))
 
+
+import os
+import matplotlib.pyplot as plt
+
+
+def plot_iteration_results(path, model_type):
+    # Traverse through each subdirectory in root_path
+    for subdir in os.listdir(root_path):
+        sub_path = os.path.join(root_path, subdir)
+
+        # Check if it is a directory
+        if os.path.isdir(sub_path):
+            # Process each .npy file within the subdirectory
+            for filename in sorted(os.listdir(sub_path)):
+                if filename.endswith(".npy"):
+                    file_path = os.path.join(sub_path, filename)
+
+                    # Load the .npy file
+                    data = np.load(file_path)
+
+                    # Plot the data (adjust for 1D or 2D data)
+                    plt.figure(figsize=(8, 6))
+                    if data.ndim == 1:
+                        plt.plot(data)
+                        plt.title(f"{filename} - Line Plot")
+                    elif data.ndim == 2:
+                        plt.imshow(data, cmap='viridis', aspect='auto')
+                        plt.colorbar()
+                        plt.title(f"{filename} - Heatmap")
+                    else:
+                        print(f"Skipping {filename}: Unsupported data dimensions ({data.ndim}).")
+                        continue
+
+                    plt.xlabel('Index')
+                    plt.ylabel('Value')
+
+                    # Save the plot in the same directory as the .npy file
+                    plot_filename = filename.replace(".npy", ".png")
+                    plot_path = os.path.join(sub_path, plot_filename)
+                    plt.savefig(plot_path)
+                    plt.close()  # Close the plot to free memory
+
+# Call the function with your path and model type
+plot_iteration_results("mvtec_results/scratch/1.0/2/logs", 'aaexad')
+
+'''
 ret_path = "mvtec_results/weights/0.5/29"
 GT_test = np.load(open(os.path.join(ret_path, "output", 'gt.npy'), 'rb'))
 Y_test = np.load(open(os.path.join(ret_path, "output", 'labels.npy'), 'rb'))
@@ -138,4 +184,7 @@ X_test=np.load(open(os.path.join(ret_path, "test_data", 'X_test.npy'), 'rb'))
 if not os.path.exists(os.path.join(ret_path,"plot")):
     os.makedirs(os.path.join(ret_path,"plot"))
 plot_results_anom_top(ret_path,'aaexad')
+'''
+path="mvtec_results/scratch/1.0/2/logs"
 
+plot_iteration_results(path,'aaexad')

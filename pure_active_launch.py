@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
 
     X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT_expert, Y_expert = \
-            mvtec(5,dataset_path,5,seed=s)
+            mvtec(5,dataset_path,10,seed=s)
 
     if l:
         c="scratch"
@@ -48,7 +48,7 @@ if __name__ == '__main__':
         c="weights"
     ret_path = os.path.join(root,c, str(purity), str(s))
 
-    data_path = os.path.join(ret_path,'test_data',str(0))
+    data_path = os.path.join(ret_path,'test_data')
     if not os.path.exists(data_path):
         os.makedirs(data_path)
 
@@ -94,6 +94,17 @@ if __name__ == '__main__':
         if not os.path.exists(active_images):
             os.makedirs(active_images)
 
+        log_path = os.path.join(ret_path,'logs',str(x))
+        if not os.path.exists(log_path):
+            os.makedirs(log_path)
+
+        if x>0:
+            np.save(open(os.path.join(log_path, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps[Y_test==-1])
+            np.save(open(os.path.join(log_path, f'aexad_scores_{x}.npy'), 'wb'), scores[Y_test==-1])
+
+            np.save(open(os.path.join(log_path, f'X_test.npy'), 'wb'), X_test[Y_test==-1])
+            np.save(open(os.path.join(log_path, f'Y_test.npy'), 'wb'), Y_test[Y_test == -1])
+            np.save(open(os.path.join(log_path, f'GT_test.npy'), 'wb'), GT_test[Y_test == -1])
 
         np.save(open(os.path.join(o, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps)
         np.save(open(os.path.join(o, f'aexad_scores_{x}.npy'), 'wb'), scores)
@@ -178,3 +189,10 @@ if __name__ == '__main__':
                                         lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l)
     np.save(open(os.path.join(o, 'aexad_htmaps_f.npy'), 'wb'), heatmaps)
     np.save(open(os.path.join(o, 'aexad_scores_f.npy'), 'wb'), scores)
+
+    np.save(open(os.path.join(log_path, 'aexad_htmaps_f.npy'), 'wb'), heatmaps[Y_test == -1])
+    np.save(open(os.path.join(log_path, 'aexad_scores_f.npy'), 'wb'), scores[Y_test == -1])
+
+    np.save(open(os.path.join(log_path, 'X_test.npy'), 'wb'), X_test[Y_test == -1])
+    np.save(open(os.path.join(log_path, 'Y_test.npy'), 'wb'), Y_test[Y_test == -1])
+    np.save(open(os.path.join(log_path, 'GT_test.npy'), 'wb'), GT_test[Y_test == -1])
