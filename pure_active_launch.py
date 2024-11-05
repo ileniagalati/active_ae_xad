@@ -86,7 +86,7 @@ if __name__ == '__main__':
     print("first lambda_u: ", lambda_u)
 
     for x in range(0, b):
-        if x>0: epochs=50
+        #if x>0: epochs=50
         print(f"training on {x} iteration")
         heatmaps, scores, _,_, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=ds,
                                         lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l)
@@ -100,12 +100,12 @@ if __name__ == '__main__':
             os.makedirs(log_path)
 
         if x>0:
-            np.save(open(os.path.join(log_path, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps[Y_expert==-1])
-            np.save(open(os.path.join(log_path, f'aexad_scores_{x}.npy'), 'wb'), scores[Y_expert==-1])
+            np.save(open(os.path.join(log_path, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps)
+            np.save(open(os.path.join(log_path, f'aexad_scores_{x}.npy'), 'wb'), scores)
 
-            np.save(open(os.path.join(log_path, f'X_test.npy'), 'wb'), X_test[Y_expert==-1])
-            np.save(open(os.path.join(log_path, f'Y_test.npy'), 'wb'), Y_test[Y_expert == -1])
-            np.save(open(os.path.join(log_path, f'GT_test.npy'), 'wb'), GT_test[Y_expert == -1])
+            np.save(open(os.path.join(log_path, f'X_test.npy'), 'wb'), X_test)
+            np.save(open(os.path.join(log_path, f'Y_test.npy'), 'wb'), Y_test)
+            np.save(open(os.path.join(log_path, f'GT_test.npy'), 'wb'), GT_test)
 
         np.save(open(os.path.join(o, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps)
         np.save(open(os.path.join(o, f'aexad_scores_{x}.npy'), 'wb'), scores)
@@ -191,9 +191,9 @@ if __name__ == '__main__':
     np.save(open(os.path.join(o, 'aexad_htmaps_f.npy'), 'wb'), heatmaps)
     np.save(open(os.path.join(o, 'aexad_scores_f.npy'), 'wb'), scores)
 
-    np.save(open(os.path.join(log_path, 'aexad_htmaps_f.npy'), 'wb'), heatmaps[Y_expert == -1])
-    np.save(open(os.path.join(log_path, 'aexad_scores_f.npy'), 'wb'), scores[Y_expert == -1])
+    np.save(open(os.path.join(log_path, 'aexad_htmaps_f.npy'), 'wb'), heatmaps)
+    np.save(open(os.path.join(log_path, 'aexad_scores_f.npy'), 'wb'), scores)
 
-    np.save(open(os.path.join(log_path, 'X_test.npy'), 'wb'), X_test[Y_expert == -1])
-    np.save(open(os.path.join(log_path, 'Y_test.npy'), 'wb'), Y_test[Y_expert == -1])
-    np.save(open(os.path.join(log_path, 'GT_test.npy'), 'wb'), GT_test[Y_expert == -1])
+    np.save(open(os.path.join(log_path, 'X_test.npy'), 'wb'), X_test)
+    np.save(open(os.path.join(log_path, 'Y_test.npy'), 'wb'), Y_test)
+    np.save(open(os.path.join(log_path, 'GT_test.npy'), 'wb'), GT_test)

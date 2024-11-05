@@ -140,13 +140,13 @@ def plot_iteration_results(path, it, model_type):
             os.makedirs(subpath)
         if i==it+1:
             i="f"
-        GT = np.load(open("mvtec_results/weights/1.0/2/output/gt.npy"), 'rb')
-        Y = np.load(open("mvtec_results/weights/1.0/2/output/labels.npy"), 'rb')
+        GT = np.load(open(os.path.join("mvtec_results/weights/1.0/2", "output", 'gt.npy'), 'rb'))
+        Y = np.load(open(os.path.join("mvtec_results/weights/1.0/2", "output", 'labels.npy'), 'rb'))
 
         htmaps_aexad = np.load(open(os.path.join(path, str(i), f'aexad_htmaps_{i}.npy'), 'rb'))
         X_test = np.load(open(os.path.join(path, str(i), 'X_test.npy'), 'rb'))
 
-        print (len(X_test))
+        print(len(X_test))
         print(len(Y))
 
         for x in range(0, len(X_test)):
@@ -165,7 +165,7 @@ def plot_iteration_results(path, it, model_type):
 
     plt.show()
 
-plot_iteration_results("mvtec_results/weights/1.0/2/logs", 10,'aaexad')
+plot_iteration_results("mvtec_results/weights/1.0/2/logs", 1,'aaexad')
 
 '''
 ret_path = "mvtec_results/weights/0.5/29"
