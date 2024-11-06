@@ -111,18 +111,14 @@ if __name__ == '__main__':
 
         idx = np.argsort(scores[Y_train == 0])[::-1]
 
-        print("indici score non etichettati", idx)
-
-        img=str(idx[0])
+        img="a"
         ext=".png"
-
-        print("indici score non etichettati", len(idx))
 
         print("scores: ", len(scores[Y_train == 0]))
         print("X: ", len(X_train[Y_train == 0]))
 
         print("idx: ", idx[0])
-
+        print("Y ", Y_train)
         #query selection
         query = X_train[Y_train == 0][idx[0]]
         img_to_save = Image.fromarray(query.astype(np.uint8))
@@ -169,10 +165,11 @@ if __name__ == '__main__':
         lambda_u = n / np.sum(Y_pure == 0) if np.sum(Y_pure == 0) > 0 else 0
         lambda_n = n / np.sum(Y_pure == 1) if np.sum(Y_pure == 1) > 0 else 0
         lambda_a = n / np.sum(Y_pure == -1) if np.sum(Y_pure == -1) > 0 else 0
-        '''
+
         print("unlabeled lambda: ", lambda_u)
         print("normal lambda: ", lambda_n)
         print("anomalous lambda: ", lambda_a)
+
         '''
         n = len(X_pure)
         n0 = np.sum(Y_pure == 0)
@@ -187,11 +184,12 @@ if __name__ == '__main__':
         lambda_u /= lambda_sum
         lambda_n /= lambda_sum
         lambda_a /= lambda_sum
+        
 
         print("unlabeled lambda normalized: ", lambda_u)
         print("normal lambda normalized: ", lambda_n)
         print("anomalous lambda normalized: ", lambda_a)
-
+        '''
 
     #training finale
     heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=ds,

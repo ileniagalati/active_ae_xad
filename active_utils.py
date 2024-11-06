@@ -38,12 +38,15 @@ def training_active_aexad(data_path, epochs, dataset, lambda_u, lambda_n, lambda
     return heatmaps, scores, _, _, tot_time
 
 def update_datasets(image_idx, mask_array, X_train, Y_train, GT_train):
+    indices_zero = np.where(Y_train == 0)[0]
+
     if np.sum(mask_array) > 0:
-        Y_train[image_idx] = -1
-        GT_train[image_idx] = mask_array
+        Y_train[indices_zero[image_idx]] = -1
+
+        GT_train[indices_zero[image_idx]] = mask_array
     else:
-        Y_train[image_idx] = 1
-        GT_train[image_idx] = mask_array
+        Y_train[indices_zero[image_idx]] = 1
+        GT_train[indices_zero[image_idx]] = mask_array
 
     X_test = X_train
     Y_test = Y_train
