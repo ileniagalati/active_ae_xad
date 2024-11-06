@@ -8,6 +8,7 @@ def f(x):
 def select_pure_samples(X_train, Y_train, GT_train, scores, purity=0.5):
     #indici di esempi unlabeled
     unlabeled_idx = np.where(Y_train == 0)[0]
+    print("unlabled_idx", len(unlabeled_idx))
 
     #indici selezionati (frazione alpha)
     selected_idx = np.argsort(scores[unlabeled_idx])[:int(purity * len(unlabeled_idx))]

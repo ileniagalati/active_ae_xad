@@ -86,7 +86,6 @@ if __name__ == '__main__':
     print("first lambda_u: ", lambda_u)
 
     for x in range(0, b):
-        if x>0: epochs=50
         print(f"training on {x} iteration")
         heatmaps, scores, _,_, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=ds,
                                         lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l)
@@ -112,8 +111,17 @@ if __name__ == '__main__':
 
         idx = np.argsort(scores[Y_train == 0])[::-1]
 
-        img="a"
+        print("indici score non etichettati", idx)
+
+        img=str(idx[0])
         ext=".png"
+
+        print("indici score non etichettati", len(idx))
+
+        print("scores: ", len(scores[Y_train == 0]))
+        print("X: ", len(X_train[Y_train == 0]))
+
+        print("idx: ", idx[0])
 
         #query selection
         query = X_train[Y_train == 0][idx[0]]
