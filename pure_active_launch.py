@@ -19,6 +19,8 @@ import argparse
 import logging
 
 
+
+
 if __name__ == '__main__':
 
     print("is cuda available: ",torch.cuda.is_available())
@@ -97,9 +99,20 @@ if __name__ == '__main__':
     print("first lambda_u: ", lambda_u)
 
     for x in range(0, b):
+        print("b1: ", b)
 
-        if x>0:
-            epochs=50
+        if(x == b):
+            break
+        if x > 0:
+            epochs = 1 #CAMBIA QUIIIII---------------------------------------------------------------------
+            n_examples = 1
+        if x == 0:
+            n_examples = int(b / 2)
+            print("n_examples: ", n_examples)
+            b = int(b/2)
+            print("b: ", b)
+
+
 
         print(f"training on {x} iteration")
         heatmaps, scores, _,_, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=ds,
@@ -126,41 +139,39 @@ if __name__ == '__main__':
 
         idx = np.argsort(scores[Y_train == 0])[::-1]
 
-        img="a"
+
         ext=".png"
 
-        print("scores: ", len(scores[Y_train == 0]))
-        print("X: ", len(X_train[Y_train == 0]))
+        for ex in range (0,n_examples):
+            print("ex: ", ex)
+            img=f"{ex}"
+            #query selection
+            query = X_train[Y_train == 0][idx[0]]
+            img_to_save = Image.fromarray(query.astype(np.uint8))
+            img_to_save.save(os.path.join(active_images, img+ext))
+            #print("dim image: ", query.shape)
 
-        print("idx: ", idx[0])
-        print("Y ", Y_train)
-        #query selection
-        query = X_train[Y_train == 0][idx[0]]
-        img_to_save = Image.fromarray(query.astype(np.uint8))
-        img_to_save.save(os.path.join(active_images, img+ext))
-        #print("dim image: ", query.shape)
+            mask_images=os.path.join(ret_path,"mask",str(x))
+            if not os.path.exists(mask_images):
+                os.makedirs(mask_images)
 
-        mask_images=os.path.join(ret_path,"mask",str(x))
-        if not os.path.exists(mask_images):
-            os.makedirs(mask_images)
+            from_path=os.path.join(active_images,img+ext)
+            to_path=os.path.join(mask_images,img+"_mask"+ext)
 
-        from_path=os.path.join(active_images,img+ext)
-        to_path=os.path.join(mask_images,img+"_mask"+ext)
+            #generazione della maschera manuale
+            #run_mask_generation(from_path,to_path)
 
-        #generazione della maschera manuale
-        #run_mask_generation(from_path,to_path)
+            #generazione della maschera dal dataset etichettato
+            mask_from_gt = GT_expert[Y_train == 0][idx[0]]
+            mask_img = Image.fromarray(mask_from_gt.astype(np.uint8))
+            mask_img.save(to_path)
 
-        #generazione della maschera dal dataset etichettato
-        mask_from_gt = GT_expert[Y_train == 0][idx[0]]
-        mask_img = Image.fromarray(mask_from_gt.astype(np.uint8))
-        mask_img.save(to_path)
+            #aggiornamento del dataset
+            mask_img = Image.open(to_path)
+            mask_array = np.array(mask_img)
 
-        #aggiornamento del dataset
-        mask_img = Image.open(to_path)
-        mask_array = np.array(mask_img)
-
-        X_train, Y_train, GT_train, X_test, Y_test, GT_test = \
-            update_datasets(idx[0], mask_array, X_train, Y_train, GT_train)
+            X_train, Y_train, GT_train, X_test, Y_test, GT_test = \
+                update_datasets(idx[0], mask_array, X_train, Y_train, GT_train)
 
         #seleziono la frazione alpha di esempi per il training che minimizzano l'anomaly score
         X_pure, Y_pure, GT_pure, pure_indices = select_pure_samples(X_train, Y_train, GT_train,scores,purity)
