@@ -115,6 +115,7 @@ class Trainer:
             labels.extend(label.detach().numpy())
         scores = np.array(scores)
         heatmaps = np.array(heatmaps)
+
         #gtmaps = np.array(gtmaps)
         #labels = np.array(labels)
         return heatmaps, scores, gtmaps, labels

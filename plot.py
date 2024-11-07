@@ -136,7 +136,7 @@ import matplotlib.pyplot as plt
 def plot_iteration_results(path, it, model_type):
     Y = np.load(open(os.path.join("mvtec_results/weights/1.0/29", "output", "labels.npy"), 'rb'))
 
-    for i in range(1,it):
+    for i in range(10,it+1):
         subpath=os.path.join(path, "plot",str(i))
         if not os.path.exists(subpath):
             os.makedirs(subpath)
@@ -150,7 +150,6 @@ def plot_iteration_results(path, it, model_type):
         print(len(Y))
 
         for x in range(0, len(X_test[Y==1])):
-            if len(X_test[Y==1]>0):
                 image = X_test[Y==1][x]
                 image = image.transpose(2, 0, 1)
                 plot_image(image)
@@ -198,24 +197,13 @@ for i in range(4,10):
     output_path=f"mvtec_results/weights/1.0/29/logs/plot/{i}.png"
     table(folder_path,output_path)
 '''
-import os
-import cv2
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
+
 
 import os
 import cv2
-import numpy as np
 import matplotlib.pyplot as plt
-
-import os
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
-
 
 def table_with_highlight(folder_path, previous_paths, output_path, current_iteration):
-    # Define paths for the current and previous iterations
     current_path = os.path.join(folder_path, str(current_iteration))
     previous_paths = [os.path.join(previous_paths, str(i)) for i in range(current_iteration)]
 
@@ -236,9 +224,9 @@ def table_with_highlight(folder_path, previous_paths, output_path, current_itera
     bordered_img_list = []
     for i, img in enumerate(img_list):
         if img_files[i] in labeled_images:
-            # Add a 5-pixel red border around labeled images
+            # Add a 10-pixel red border around labeled images
             red_border = [255, 0, 0]  # RGB color for red
-            img_with_border = cv2.copyMakeBorder(img, 5, 5, 5, 5, cv2.BORDER_CONSTANT, value=red_border)
+            img_with_border = cv2.copyMakeBorder(img, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=red_border)
             bordered_img_list.append(img_with_border)
         else:
             # No border for unlabeled images
@@ -266,56 +254,11 @@ def table_with_highlight(folder_path, previous_paths, output_path, current_itera
     plt.savefig(output_path, bbox_inches='tight')
     plt.close(fig)
 
-    '''
-def table_with_highlight(folder_path, previous_paths, output_path, current_iteration):
-    # Get the paths for the current and all previous iterations
-    current_path = os.path.join(folder_path, str(current_iteration))
-    previous_paths = [os.path.join(previous_paths, str(i)) for i in range(current_iteration)]
 
-    # Get sorted lists of files for 'img' and 'ht' in the current iteration
-    img_files = sorted([f for f in os.listdir(current_path) if f.startswith('img')])
-    ht_files = sorted([f for f in os.listdir(current_path) if f.startswith('ht')])
-
-    # Load images and convert to RGB
-    img_list = [cv2.cvtColor(cv2.imread(os.path.join(current_path, f)), cv2.COLOR_BGR2RGB) for f in img_files]
-    ht_list = [cv2.cvtColor(cv2.imread(os.path.join(current_path, f)), cv2.COLOR_BGR2RGB) for f in ht_files]
-
-    # Identify labeled images from previous iterations
-    labeled_images = set()
-    for path in previous_paths:
-        labeled_images.update(os.listdir(path))
-
-    # Determine the maximum number of columns needed
-    n_cols = max(len(img_list), len(ht_list))
-
-    # Create a 2-row plot for img and ht images
-    fig, axs = plt.subplots(2, n_cols, figsize=(2 * n_cols, 6))
-
-    # Fill in each row of the plot
-    for col in range(n_cols):
-        if col < len(img_list):
-            axs[0, col].imshow(img_list[col])
-            axs[0, col].axis('off')
-
-            # Add a red border if img file was labeled in previous iterations
-            if img_files[col] in labeled_images:
-                # Create a red rectangle around the image
-                rect = patches.Rectangle((0, 0), img_list[col].shape[1], img_list[col].shape[0],
-                                         linewidth=2, edgecolor='red', facecolor='none')
-                axs[0, col].add_patch(rect)
-
-        if col < len(ht_list):
-            axs[1, col].imshow(ht_list[col])
-            axs[1, col].axis('off')
-
-    # Save the plot to the specified output path
-    plt.savefig(output_path, bbox_inches='tight')
-    plt.close(fig)
-'''
 previous_path = "mvtec_results/weights/1.0/29/mask"
-for i in range(1,10):
+for i in range(1,11):
     folder_path=f"mvtec_results/weights/1.0/29/logs/plot"
-    output_path=f"mvtec_results/weights/1.0/29/logs/plot/highlights/{i}.png"
+    output_path=f"mvtec_results/weights/1.0/29/logs/plot/{i}.png"
     table_with_highlight(folder_path,previous_path,output_path,i)
 
 '''

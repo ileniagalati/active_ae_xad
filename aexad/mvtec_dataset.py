@@ -27,22 +27,22 @@ class MvtecAD(Dataset):
             x = np.load(os.path.join(path, f'X_{split}.npy'))  # / 255.0)[:,:,:,0]
             y = np.load(os.path.join(path, f'Y_{split}.npy'))
             gt = np.load(os.path.join(path, f'GT_{split}.npy'))
-            '''
+
             print("training on x: ", x.shape)
             print("training on y: ", y.shape)
             print("training on gt: ", gt.shape)
-            '''
+
 
         else:
             split = 'test'
             x = np.load(os.path.join(path, f'X_{split}.npy'))  # / 255.0)[:,:,:,0]
             y = np.load(os.path.join(path, f'Y_{split}.npy'))
             gt = np.load(os.path.join(path, f'GT_{split}.npy'))
-            '''
+
             print("testing on x: ", x.shape)
             print("testing on y: ", y.shape)
             print("testing on gt: ", gt.shape)
-            '''
+
 
 
         # normal_data = x[y == 0]

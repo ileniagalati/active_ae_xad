@@ -126,13 +126,13 @@ if __name__ == '__main__':
         if not os.path.exists(log_path):
             os.makedirs(log_path)
 
-        if x>0:
-            np.save(open(os.path.join(log_path, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps)
-            np.save(open(os.path.join(log_path, f'aexad_scores_{x}.npy'), 'wb'), scores)
 
-            np.save(open(os.path.join(log_path, f'X_test.npy'), 'wb'), X_test)
-            np.save(open(os.path.join(log_path, f'Y_test.npy'), 'wb'), Y_test)
-            np.save(open(os.path.join(log_path, f'GT_test.npy'), 'wb'), GT_test)
+        np.save(open(os.path.join(log_path, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps)
+        np.save(open(os.path.join(log_path, f'aexad_scores_{x}.npy'), 'wb'), scores)
+
+        np.save(open(os.path.join(log_path, f'X_test.npy'), 'wb'), X_test)
+        np.save(open(os.path.join(log_path, f'Y_test.npy'), 'wb'), Y_test)
+        np.save(open(os.path.join(log_path, f'GT_test.npy'), 'wb'), GT_test)
 
         np.save(open(os.path.join(o, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps)
         np.save(open(os.path.join(o, f'aexad_scores_{x}.npy'), 'wb'), scores)
@@ -196,26 +196,6 @@ if __name__ == '__main__':
         print("normal lambda: ", lambda_n)
         print("anomalous lambda: ", lambda_a)
 
-        '''
-        n = len(X_pure)
-        n0 = np.sum(Y_pure == 0)
-        n1 = np.sum(Y_pure == 1)
-        n_1 = np.sum(Y_pure == -1)
-
-        lambda_u = n / n0 if n0 > 0 else 0
-        lambda_n = n / n1 if n1 > 0 else 0
-        lambda_a = n / n_1 if n_1 > 0 else 0
-
-        lambda_sum = lambda_u + lambda_n + lambda_a
-        lambda_u /= lambda_sum
-        lambda_n /= lambda_sum
-        lambda_a /= lambda_sum
-        
-
-        print("unlabeled lambda normalized: ", lambda_u)
-        print("normal lambda normalized: ", lambda_n)
-        print("anomalous lambda normalized: ", lambda_a)
-        '''
 
     log_path = os.path.join(ret_path, 'logs', "f")
     if not os.path.exists(log_path):
