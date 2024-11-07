@@ -14,7 +14,7 @@ def select_pure_samples(X_train, Y_train, GT_train, scores, purity=0.5):
     selected_idx = np.argsort(scores[unlabeled_idx])[:int(purity * len(unlabeled_idx))]
     pure_indices = unlabeled_idx[selected_idx]
 
-    #creiamo il nuovo dataset
+    #creazione del nuovo dataset
     X_pure = X_train[pure_indices]
     X_pure = np.append(X_pure, X_train[Y_train == 1], axis=0)
     X_pure = np.append(X_pure, X_train[Y_train == -1], axis=0)

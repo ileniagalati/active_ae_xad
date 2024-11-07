@@ -14,6 +14,11 @@ import numpy as np
 from aexad.tools.utils import plot_image_tosave, plot_heatmap_tosave
 from active_utils import *
 
+
+import argparse
+import logging
+
+
 if __name__ == '__main__':
 
     print("is cuda available: ",torch.cuda.is_available())
@@ -26,7 +31,13 @@ if __name__ == '__main__':
     parser.add_argument('-p', type=float, default=0.5, help='Purity parameter for active learning')
     parser.add_argument('-l', type=float, default=1, help='0: starting training from last iteration; 1: starting training from scratch')
     parser.add_argument('-r', type=str, default='results', help='Results path')
+    parser.add_argument('--debug', action='store_true', help="Attiva il debug mode")
     args = parser.parse_args()
+
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
 
     b = args.b
     epochs= args.e
@@ -195,6 +206,9 @@ if __name__ == '__main__':
         print("anomalous lambda normalized: ", lambda_a)
         '''
 
+    log_path = os.path.join(ret_path, 'logs', "f")
+    if not os.path.exists(log_path):
+        os.makedirs(log_path)
     #training finale
     heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=ds,
                                         lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l)

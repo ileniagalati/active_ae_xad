@@ -158,7 +158,7 @@ def plot_iteration_results(path, it, model_type):
                 plot_heatmap(htmaps_aexad[Y == 1][x])
                 plt.savefig(os.path.join(subpath, f"ht_{i}_{x}.png"))
 
-#plot_iteration_results("mvtec_results/weights/1.0/29/logs", 2,'aaexad')
+#plot_iteration_results("mvtec_results/weights/1.0/29/logs", 10,'aaexad')
 
 '''
 import os
