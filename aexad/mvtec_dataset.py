@@ -27,22 +27,22 @@ class MvtecAD(Dataset):
             x = np.load(os.path.join(path, f'X_{split}.npy'))  # / 255.0)[:,:,:,0]
             y = np.load(os.path.join(path, f'Y_{split}.npy'))
             gt = np.load(os.path.join(path, f'GT_{split}.npy'))
-            '''
+
             print("training on x: ", x.shape)
             print("training on y: ", y.shape)
             print("training on gt: ", gt.shape)
-            '''
+
 
         else:
             split = 'test'
             x = np.load(os.path.join(path, f'X_{split}.npy'))  # / 255.0)[:,:,:,0]
             y = np.load(os.path.join(path, f'Y_{split}.npy'))
             gt = np.load(os.path.join(path, f'GT_{split}.npy'))
-            '''
+
             print("testing on x: ", x.shape)
             print("testing on y: ", y.shape)
             print("testing on gt: ", gt.shape)
-            '''
+
 
 
         # normal_data = x[y == 0]
@@ -59,6 +59,7 @@ class MvtecAD(Dataset):
     def __getitem__(self, index):
         image = np.array(self.images[index], dtype=np.uint8)
         image_label = np.array(self.gt[index], dtype=np.uint8)
+        print("img shape: ", image.shape)
 
         sample = {'image': self.transform(image) / 255.0,
                   'label': self.labels[index],

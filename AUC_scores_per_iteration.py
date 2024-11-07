@@ -26,7 +26,7 @@ for i in range (1,11):
     htmap_stats.append(Xauc(GT[Y == 1], htmaps_aexad[Y == 1]))
     det_stats.append(roc_auc_score(Y, scores_aexad))
 
-#serve sistemare la size delle gt
+# sistemare la size delle gt
 gt_resized = np.zeros((GT.shape[0], 3, 256, 256), dtype=np.uint8)
 for i in range(GT.shape[0]):
     img = Image.fromarray(GT[i])

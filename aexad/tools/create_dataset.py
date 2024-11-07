@@ -292,6 +292,15 @@ def mvtec(cl, path, n_anom_per_cls, seed=29):
     Y_train = np.zeros(X_train.shape[0])
     Y_test = np.zeros(X_test.shape[0])
 
+    print("XTrain 0: ", X_train.shape)
+    print("YTrain: ", Y_train.shape)
+    print("GTTrain: ", GT_train.shape)
+    print("XTest: ", X_test.shape)
+    print("YTest: ", Y_test.shape)
+    print("GTTest: ", GT_test.shape)
+    print("GT: ", GT.shape)
+    print("Y: ", Y.shape)
+
     return X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT, Y
 
 

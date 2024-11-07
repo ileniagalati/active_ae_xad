@@ -105,6 +105,15 @@ if __name__ == '__main__':
         heatmaps, scores, _,_, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=ds,
                                         lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l)
 
+        print("XTrain 1: ", X_train.shape)
+        print("YTrain: ", Y_train.shape)
+        print("GTTrain: ", GT_train.shape)
+        print("XTest: ", X_test.shape)
+        print("YTest: ", Y_test.shape)
+        print("GTTest: ", GT_test.shape)
+        print("GT: ", GT_expert.shape)
+        print("Y: ", Y_expert.shape)
+
         active_images=os.path.join(ret_path,"query",str(x))
         if not os.path.exists(active_images):
             os.makedirs(active_images)
@@ -113,13 +122,13 @@ if __name__ == '__main__':
         if not os.path.exists(log_path):
             os.makedirs(log_path)
 
-        if x>0:
-            np.save(open(os.path.join(log_path, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps)
-            np.save(open(os.path.join(log_path, f'aexad_scores_{x}.npy'), 'wb'), scores)
 
-            np.save(open(os.path.join(log_path, f'X_test.npy'), 'wb'), X_test)
-            np.save(open(os.path.join(log_path, f'Y_test.npy'), 'wb'), Y_test)
-            np.save(open(os.path.join(log_path, f'GT_test.npy'), 'wb'), GT_test)
+        np.save(open(os.path.join(log_path, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps)
+        np.save(open(os.path.join(log_path, f'aexad_scores_{x}.npy'), 'wb'), scores)
+
+        np.save(open(os.path.join(log_path, f'X_test.npy'), 'wb'), X_test)
+        np.save(open(os.path.join(log_path, f'Y_test.npy'), 'wb'), Y_test)
+        np.save(open(os.path.join(log_path, f'GT_test.npy'), 'wb'), GT_test)
 
         np.save(open(os.path.join(o, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps)
         np.save(open(os.path.join(o, f'aexad_scores_{x}.npy'), 'wb'), scores)
@@ -175,6 +184,15 @@ if __name__ == '__main__':
         np.save(open(os.path.join(data_path, 'Y_test.npy'), 'wb'), Y_test)
         np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
 
+        print("XTrain 2: ", X_pure.shape)
+        print("YTrain: ", Y_pure.shape)
+        print("GTTrain: ", GT_pure.shape)
+        print("XTest: ", X_test.shape)
+        print("YTest: ", Y_test.shape)
+        print("GTTest: ", GT_test.shape)
+        print("GT: ", GT_expert.shape)
+        print("Y: ", Y_expert.shape)
+
         #update dei valori dei pesi della loss e normalizzazione degli stessi, sum=1
         n = len(X_pure)
         lambda_u = n / np.sum(Y_pure == 0) if np.sum(Y_pure == 0) > 0 else 0
@@ -221,3 +239,12 @@ if __name__ == '__main__':
     np.save(open(os.path.join(log_path, 'X_test.npy'), 'wb'), X_test)
     np.save(open(os.path.join(log_path, 'Y_test.npy'), 'wb'), Y_test)
     np.save(open(os.path.join(log_path, 'GT_test.npy'), 'wb'), GT_test)
+
+    print("XTrain 3: ", X_pure.shape)
+    print("YTrain: ", Y_pure.shape)
+    print("GTTrain: ", GT_pure.shape)
+    print("XTest: ", X_test.shape)
+    print("YTest: ", Y_test.shape)
+    print("GTTest: ", GT_test.shape)
+    print("GT: ", GT_expert.shape)
+    print("Y: ", Y_expert.shape)
