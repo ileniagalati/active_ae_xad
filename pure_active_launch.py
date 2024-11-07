@@ -105,15 +105,6 @@ if __name__ == '__main__':
         heatmaps, scores, _,_, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=ds,
                                         lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l)
 
-        print("XTrain 1: ", X_train.shape)
-        print("YTrain: ", Y_train.shape)
-        print("GTTrain: ", GT_train.shape)
-        print("XTest: ", X_test.shape)
-        print("YTest: ", Y_test.shape)
-        print("GTTest: ", GT_test.shape)
-        print("GT: ", GT_expert.shape)
-        print("Y: ", Y_expert.shape)
-
         active_images=os.path.join(ret_path,"query",str(x))
         if not os.path.exists(active_images):
             os.makedirs(active_images)
@@ -184,15 +175,6 @@ if __name__ == '__main__':
         np.save(open(os.path.join(data_path, 'Y_test.npy'), 'wb'), Y_test)
         np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
 
-        print("XTrain 2: ", X_pure.shape)
-        print("YTrain: ", Y_pure.shape)
-        print("GTTrain: ", GT_pure.shape)
-        print("XTest: ", X_test.shape)
-        print("YTest: ", Y_test.shape)
-        print("GTTest: ", GT_test.shape)
-        print("GT: ", GT_expert.shape)
-        print("Y: ", Y_expert.shape)
-
         #update dei valori dei pesi della loss e normalizzazione degli stessi, sum=1
         n = len(X_pure)
         lambda_u = n / np.sum(Y_pure == 0) if np.sum(Y_pure == 0) > 0 else 0
@@ -203,26 +185,6 @@ if __name__ == '__main__':
         print("normal lambda: ", lambda_n)
         print("anomalous lambda: ", lambda_a)
 
-        '''
-        n = len(X_pure)
-        n0 = np.sum(Y_pure == 0)
-        n1 = np.sum(Y_pure == 1)
-        n_1 = np.sum(Y_pure == -1)
-
-        lambda_u = n / n0 if n0 > 0 else 0
-        lambda_n = n / n1 if n1 > 0 else 0
-        lambda_a = n / n_1 if n_1 > 0 else 0
-
-        lambda_sum = lambda_u + lambda_n + lambda_a
-        lambda_u /= lambda_sum
-        lambda_n /= lambda_sum
-        lambda_a /= lambda_sum
-        
-
-        print("unlabeled lambda normalized: ", lambda_u)
-        print("normal lambda normalized: ", lambda_n)
-        print("anomalous lambda normalized: ", lambda_a)
-        '''
 
     log_path = os.path.join(ret_path, 'logs', "f")
     if not os.path.exists(log_path):
@@ -239,12 +201,3 @@ if __name__ == '__main__':
     np.save(open(os.path.join(log_path, 'X_test.npy'), 'wb'), X_test)
     np.save(open(os.path.join(log_path, 'Y_test.npy'), 'wb'), Y_test)
     np.save(open(os.path.join(log_path, 'GT_test.npy'), 'wb'), GT_test)
-
-    print("XTrain 3: ", X_pure.shape)
-    print("YTrain: ", Y_pure.shape)
-    print("GTTrain: ", GT_pure.shape)
-    print("XTest: ", X_test.shape)
-    print("YTest: ", Y_test.shape)
-    print("GTTest: ", GT_test.shape)
-    print("GT: ", GT_expert.shape)
-    print("Y: ", Y_expert.shape)
