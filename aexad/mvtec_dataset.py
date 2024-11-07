@@ -59,7 +59,6 @@ class MvtecAD(Dataset):
     def __getitem__(self, index):
         image = np.array(self.images[index], dtype=np.uint8)
         image_label = np.array(self.gt[index], dtype=np.uint8)
-        print("img shape: ", image.shape)
 
         sample = {'image': self.transform(image) / 255.0,
                   'label': self.labels[index],
