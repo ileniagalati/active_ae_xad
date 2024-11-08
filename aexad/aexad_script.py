@@ -17,7 +17,7 @@ from scipy.ndimage import gaussian_filter
 from aexad.mvtec_dataset import MvtecAD
 from brain_dataset import BrainDataset
 
-#TODO: IMPORTANTE! Quando cambi loss, decommenta(o riformula) riga 143 self.criterion
+
 class Trainer:
     def __init__(self, latent_dim, lambda_p, lambda_s, f, path, AE_type, batch_size=None, silent=False, use_cuda=True,
                  loss='aexad', save_intermediate=False, dataset='mnist'):
