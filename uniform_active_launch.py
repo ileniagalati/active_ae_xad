@@ -130,7 +130,7 @@ if __name__ == '__main__':
 
 
         ext=".png"
-        img=f"{ex}"
+        img="a"
         #query selection
         query = X_train[Y_train == 0][idx[0]]
         img_to_save = Image.fromarray(query.astype(np.uint8))
