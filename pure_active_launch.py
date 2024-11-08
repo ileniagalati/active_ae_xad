@@ -99,7 +99,7 @@ if __name__ == '__main__':
         if(x == b):
             break
         if x > 0:
-            epochs = 50
+            epochs = 1
             n_examples = 1
         if x == 0:
             n_examples = int(b / 2)
