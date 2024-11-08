@@ -202,7 +202,7 @@ if __name__ == '__main__':
 
     np.save(open(os.path.join(log_path, 'aexad_htmaps_f.npy'), 'wb'), heatmaps)
     np.save(open(os.path.join(log_path, 'aexad_scores_f.npy'), 'wb'), scores)
-    np.save(open(os.path.join(log_path, f'output_{x}.npy'), 'wb'), output)
+    np.save(open(os.path.join(log_path, 'output_f.npy'), 'wb'), output)
 
     np.save(open(os.path.join(log_path, 'X_test.npy'), 'wb'), X_test)
     np.save(open(os.path.join(log_path, 'Y_test.npy'), 'wb'), Y_test)

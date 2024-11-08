@@ -139,10 +139,17 @@ class Trainer:
         latest_weights = os.path.join(save_path, 'latest_model_weights.pt')
         if not restart_from_scratch and os.path.exists(latest_weights):
             self.model.load_state_dict(torch.load(latest_weights))
-            print("starting training from last iteration model weights...")
+            print("Starting training from last iteration model weights...")
+            # Stampa i primi pesi dopo il caricamento
+            for name, param in self.model.named_parameters():
+                if param.requires_grad:
+                    print(f"{name} weights after loading:", param.data.view(-1)[:5])
         elif restart_from_scratch:
-            self.initialize_model_weights()
-            print("starting training from scratch...")
+            print("Starting training from scratch...")
+            # Stampa i primi pesi dopo l'inizializzazione
+            for name, param in self.model.named_parameters():
+                if param.requires_grad:
+                    print(f"{name} weights after initialization:", param.data.view(-1)[:5])
 
         self.model.train()
         for epoch in range(epochs):
@@ -170,22 +177,28 @@ class Trainer:
             # Salva pesi intermedi solo se specificato
             if self.save_intermediate and (epoch + 1) % 50 == 0:
                 torch.save(self.model.state_dict(), os.path.join(save_path, f'{name}_{epoch}.pt'))
+                print(f"Intermediate weights saved at epoch {epoch + 1}")
 
         # Salva i pesi finali dell'iterazione di active learning
         torch.save(self.model.state_dict(), latest_weights)
-        print(f"saving weights: {latest_weights}")
+        print(f"Saving weights: {latest_weights}")
 
-
-    def initialize_model_weights(self):
-        for layer in self.model.modules():
-            if hasattr(layer, 'reset_parameters'):
-                layer.reset_parameters()
+        # Stampa i primi pesi finali per verificare che siano cambiati durante l'allenamento
+        for name, param in self.model.named_parameters():
+            if param.requires_grad:
+                print(f"{name} weights after training:", param.data.view(-1)[:5])
 
     def save_weights(self, filename):
         torch.save(self.model.state_dict(), os.path.join(filename))
+        print("Weights saved to:", filename)
 
     def load_weights(self, filename):
         self.model.load_state_dict(torch.load(filename))
+        print("Weights loaded from:", filename)
+        # Stampa i primi pesi dopo il caricamento
+        for name, param in self.model.named_parameters():
+            if param.requires_grad:
+                print(f"{name} weights after loading from file:", param.data.view(-1)[:5])
 
 
 def launch(data_path, epochs, batch_size, latent_dim, lambda_u, lambda_n, lambda_a, f, AE_type, loss='aexad',
