@@ -97,6 +97,7 @@ class Trainer:
         scores = []
         gtmaps = []
         labels = []
+        outputs = []
         for i, sample in enumerate(tbar):
             image= sample['image']
             label = sample['label']
@@ -113,13 +114,15 @@ class Trainer:
             scores.extend(score)
             gtmaps.extend(gtmap.detach().numpy())
             labels.extend(label.detach().numpy())
+            outputs.extend(output)
+
         scores = np.array(scores)
         heatmaps = np.array(heatmaps)
-        output = np.array(output)
+        outputs = np.array(outputs)
 
         #gtmaps = np.array(gtmaps)
         #labels = np.array(labels)
-        return heatmaps, scores, gtmaps, labels, output
+        return heatmaps, scores, gtmaps, labels, outputs
 
     def train(self, epochs, save_path='', restart_from_scratch=False):
         if isinstance(self.model, Conv_Autoencoder):

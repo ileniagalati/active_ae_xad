@@ -2,7 +2,7 @@ import argparse
 import os
 import shutil
 import pickle
-import matplotlib.pyplot as plt
+
 import subprocess
 import torch
 from PIL import Image
