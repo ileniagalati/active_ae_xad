@@ -104,15 +104,13 @@ if __name__ == '__main__':
         if(x == b):
             break
         if x > 0:
-            epochs = 1
+            epochs = 50
             n_examples = 1
         if x == 0:
             n_examples = int(b / 2)
             print("n_examples: ", n_examples)
             b = int(b/2)
             print("b: ", b)
-
-
 
         print(f"training on {x} iteration")
         heatmaps, scores, _,_, tot_time, output = training_active_aexad(data_path,epochs=epochs,dataset=ds,
