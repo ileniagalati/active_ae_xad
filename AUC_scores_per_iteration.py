@@ -9,14 +9,14 @@ ds="mvtec"
 htmap_stats = []
 det_stats = []
 
-ret_path = "mvtec_results/weights/1.0/29"
+ret_path = "mvtec_results/decreasing queries/weights/1.0/29"
 GT = np.load(open(os.path.join(ret_path,"output", 'gt.npy'), 'rb'))
 Y = np.load(open(os.path.join(ret_path,"output", 'labels.npy'), 'rb'))
 #Y_test = np.load(open(os.path.join(ret_path,'test_data', 'Y_test.npy'), 'rb'))
 
-for i in range (1,11):
+for i in range (0,5):
 
-    if i==10:
+    if i==5:
         i='f'
 
     htmaps_aexad = np.load(open(os.path.join(ret_path,"output", f'aexad_htmaps_{i}.npy'), 'rb'))

@@ -134,9 +134,9 @@ import matplotlib.pyplot as plt
 
 
 def plot_iteration_results(path, it, model_type):
-    Y = np.load(open(os.path.join("mvtec_results/weights/1.0/42", "output", "labels.npy"), 'rb'))
+    Y = np.load(open(os.path.join("mvtec_results/decreasing queries/weights/1.0/29", "output", "labels.npy"), 'rb'))
 
-    for i in range(0,it+1):
+    for i in range(3,it+1):
         subpath=os.path.join(path, "plot",str(i))
         if not os.path.exists(subpath):
             os.makedirs(subpath)
@@ -163,7 +163,7 @@ def plot_iteration_results(path, it, model_type):
                 plot_heatmap(htmaps_aexad[Y == 1][x])
                 plt.savefig(os.path.join(subpath, f"ht_{i}_{x}.png"))
 
-plot_iteration_results("mvtec_results/weights/1.0/42/logs", 5, 'aaexad')
+plot_iteration_results("mvtec_results/decreasing queries/weights/1.0/29/logs", 5, 'aaexad')
 
 '''
 import os
