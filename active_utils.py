@@ -30,12 +30,12 @@ def select_pure_samples(X_train, Y_train, GT_train, scores, purity=0.5):
     return X_pure, Y_pure, GT_pure, pure_indices
 
 def training_active_aexad(data_path, epochs, dataset, lambda_u, lambda_n, lambda_a, ret_path, times, l):
-    heatmaps, scores, _, _, tot_time = launch_aexad(data_path, epochs,8, 32, lambda_u, lambda_n, lambda_a, f=f, AE_type='conv',
+    heatmaps, scores, _, _, tot_time, output = launch_aexad(data_path, epochs,8, 32, lambda_u, lambda_n, lambda_a, f=f, AE_type='conv',
                                                     save_intermediate=True, save_path=ret_path, dataset=dataset, loss='aaexad', restart_from_scratch=l)
     times.append(tot_time)
     np.save(open(os.path.join(ret_path, 'times.npy'), 'wb'), np.array(times))
 
-    return heatmaps, scores, _, _, tot_time
+    return heatmaps, scores, _, _, tot_time, output
 
 def update_datasets(image_idx, mask_array, X_train, Y_train, GT_train):
     indices_zero = np.where(Y_train == 0)[0]

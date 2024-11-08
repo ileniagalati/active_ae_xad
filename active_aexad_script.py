@@ -115,10 +115,11 @@ class Trainer:
             labels.extend(label.detach().numpy())
         scores = np.array(scores)
         heatmaps = np.array(heatmaps)
+        output = np.array(output)
 
         #gtmaps = np.array(gtmaps)
         #labels = np.array(labels)
-        return heatmaps, scores, gtmaps, labels
+        return heatmaps, scores, gtmaps, labels, output
 
     def train(self, epochs, save_path='', restart_from_scratch=False):
         if isinstance(self.model, Conv_Autoencoder):
@@ -195,9 +196,9 @@ def launch(data_path, epochs, batch_size, latent_dim, lambda_u, lambda_n, lambda
     trainer.train(epochs, save_path=save_path, restart_from_scratch=restart_from_scratch)
     tot_time = time() - start
 
-    heatmaps, scores, gtmaps, labels = trainer.test()
+    heatmaps, scores, gtmaps, labels, output = trainer.test()
 
-    return heatmaps, scores, gtmaps, labels, tot_time
+    return heatmaps, scores, gtmaps, labels, tot_time, output
 
 
 

@@ -115,7 +115,7 @@ if __name__ == '__main__':
 
 
         print(f"training on {x} iteration")
-        heatmaps, scores, _,_, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=ds,
+        heatmaps, scores, _,_, tot_time, output = training_active_aexad(data_path,epochs=epochs,dataset=ds,
                                         lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l)
 
         active_images=os.path.join(ret_path,"query",str(x))
@@ -129,6 +129,7 @@ if __name__ == '__main__':
 
         np.save(open(os.path.join(log_path, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps)
         np.save(open(os.path.join(log_path, f'aexad_scores_{x}.npy'), 'wb'), scores)
+        np.save(open(os.path.join(log_path, f'output_{x}.npy'), 'wb'), output)
 
         np.save(open(os.path.join(log_path, f'X_test.npy'), 'wb'), X_test)
         np.save(open(os.path.join(log_path, f'Y_test.npy'), 'wb'), Y_test)
@@ -201,13 +202,14 @@ if __name__ == '__main__':
     if not os.path.exists(log_path):
         os.makedirs(log_path)
     #training finale
-    heatmaps, scores, _, _, tot_time = training_active_aexad(data_path,epochs=epochs,dataset=ds,
+    heatmaps, scores, _, _, tot_time, output = training_active_aexad(data_path,epochs=epochs,dataset=ds,
                                         lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l)
     np.save(open(os.path.join(o, 'aexad_htmaps_f.npy'), 'wb'), heatmaps)
     np.save(open(os.path.join(o, 'aexad_scores_f.npy'), 'wb'), scores)
 
     np.save(open(os.path.join(log_path, 'aexad_htmaps_f.npy'), 'wb'), heatmaps)
     np.save(open(os.path.join(log_path, 'aexad_scores_f.npy'), 'wb'), scores)
+    np.save(open(os.path.join(log_path, f'output_{x}.npy'), 'wb'), output)
 
     np.save(open(os.path.join(log_path, 'X_test.npy'), 'wb'), X_test)
     np.save(open(os.path.join(log_path, 'Y_test.npy'), 'wb'), Y_test)
