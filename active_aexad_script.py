@@ -74,7 +74,7 @@ class Trainer:
         else:
             raise Exception()
 
-        self.optimizer = torch.optim.Adam(self.model.parameters())
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.0001)
         if loss == 'aexad':
             self.criterion = AEXAD_loss(lambda_n, lambda_a, f, self.cuda)
         if loss == 'aaexad':
