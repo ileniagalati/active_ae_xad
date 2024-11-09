@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
     for x in range(0, b):
         if x > 0:
-            epochs = 15
+            epochs = 10
 
 
         print(f"training on {x} iteration")
