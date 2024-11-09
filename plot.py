@@ -134,20 +134,20 @@ import matplotlib.pyplot as plt
 
 
 def plot_iteration_results(path, it, model_type):
-    Y = np.load(open(os.path.join("mvtec_results/decreasing queries/weights/1.0/29", "output", "labels.npy"), 'rb'))
+    Y = np.load(open(os.path.join(path, "output", "labels.npy"), 'rb'))
 
-    for i in range(5,it+1):
+    for i in range(0,it+1):
         subpath=os.path.join(path, "plot",str(i))
         if not os.path.exists(subpath):
             os.makedirs(subpath)
         if i==it:
             i="f"
 
-        htmaps_aexad = np.load(open(os.path.join(path, str(i), f'aexad_htmaps_{i}.npy'), 'rb'))
-        X_test = np.load(open(os.path.join(path, str(i), 'X_test.npy'), 'rb'))
-        O = np.load(open(os.path.join(path, str(i), f'output_5.npy'), 'rb'))
+        htmaps_aexad = np.load(open(os.path.join(os.path.join(path,"logs"), str(i), f'aexad_htmaps_{i}.npy'), 'rb'))
+        X_test = np.load(open(os.path.join(os.path.join(path,"logs"), str(i), 'X_test.npy'), 'rb'))
+        O = np.load(open(os.path.join(os.path.join(path,"logs"), str(i), f'output_{i}.npy'), 'rb'))
 
-        print (len(X_test))
+        print(len(X_test))
         print(len(Y))
 
         for x in range(0, len(X_test[Y==1])):
@@ -163,7 +163,7 @@ def plot_iteration_results(path, it, model_type):
                 plot_heatmap(htmaps_aexad[Y == 1][x])
                 plt.savefig(os.path.join(subpath, f"ht_{i}_{x}.png"))
 
-#plot_iteration_results("mvtec_results/decreasing queries/weights/1.0/29/logs", 5, 'aaexad')
+plot_iteration_results("mvtec_results/colab/no_pure/weights/1.0/29", 2, 'aaexad')
 
 import os
 import matplotlib.pyplot as plt
@@ -202,11 +202,11 @@ def table(folder_path,output_path):
         plt.savefig(output_path, bbox_inches='tight')
         plt.close(fig)
 
-previous_path = "mvtec_results/decreasing queries/weights/1.0/29/mask"
+'''previous_path = "mvtec_results/decreasing queries/weights/1.0/29/mask"
 for i in range(0,6):
     folder_path=f"mvtec_results/decreasing queries/weights/1.0/29/logs/plot/{i}"
     output_path=f"mvtec_results/decreasing queries/weights/1.0/29/logs/plot/{i}.png"
-    table(folder_path,output_path)
+    table(folder_path,output_path)'''
 
 '''
 

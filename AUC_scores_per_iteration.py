@@ -9,7 +9,7 @@ ds="mvtec"
 htmap_stats = []
 det_stats = []
 
-ret_path = "mvtec_results/decreasing queries/weights/1.0/29"
+ret_path = "mvtec_results/colab/no_pure/weights/1.0/29"
 GT = np.load(open(os.path.join(ret_path,"output", 'gt.npy'), 'rb'))
 Y = np.load(open(os.path.join(ret_path,"output", 'labels.npy'), 'rb'))
 #Y_test = np.load(open(os.path.join(ret_path,'test_data', 'Y_test.npy'), 'rb'))
