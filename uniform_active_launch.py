@@ -128,9 +128,6 @@ if __name__ == '__main__':
 
         idx = np.argsort(scores[Y_train == 0])[::-1]
 
-        print("scores: ",scores[Y_train == 0])
-        print("scegliamo: ", idx[0])
-
 
         ext=".png"
         img="a"
