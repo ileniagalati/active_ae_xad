@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
     for x in range(0, b):
         if x > 0:
-            epochs = 10
+            epochs = 20
 
         print(f"training on {x} iteration")
         heatmaps, scores, _,_, tot_time, output = training_active_aexad(data_path,epochs=epochs,dataset=ds,
