@@ -74,7 +74,10 @@ class Trainer:
         else:
             raise Exception()
 
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.0001)
+        import torch.optim as optim
+
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
+        self.decay_factor = 0.1
         if loss == 'aexad':
             self.criterion = AEXAD_loss(lambda_n, lambda_a, f, self.cuda)
         if loss == 'aaexad':
@@ -124,7 +127,7 @@ class Trainer:
         #labels = np.array(labels)
         return heatmaps, scores, gtmaps, labels, outputs
 
-    def train(self, epochs, save_path='', restart_from_scratch=False):
+    def train(self, epochs, save_path='', restart_from_scratch=False, iteration=0):
         if isinstance(self.model, Conv_Autoencoder):
             name = 'model_conv'
         elif isinstance(self.model, Conv_Autoencoder_f2):
@@ -142,6 +145,12 @@ class Trainer:
             print("starting training from last iteration model weights...")
         elif restart_from_scratch:
             print("starting training from scratch...")
+
+        if iteration > 0:
+            print("learning rate: ", self.optimizer.param_groups[0]['lr'])
+            for param_group in self.optimizer.param_groups:
+                param_group['lr'] = 0.001 * self.decay_factor
+        print("learning rate: ", self.optimizer.param_groups[0]['lr'])
 
         self.model.train()
         for epoch in range(epochs):
@@ -182,14 +191,14 @@ class Trainer:
 
 
 def launch(data_path, epochs, batch_size, latent_dim, lambda_u, lambda_n, lambda_a, f, AE_type, loss='aexad',
-           save_intermediate=False, save_path='', use_cuda=True, dataset='mnist', restart_from_scratch=False):
+           save_intermediate=False, save_path='', use_cuda=True, dataset='mnist', restart_from_scratch=False, iteration=0):
     trainer = Trainer(latent_dim, lambda_u, lambda_n, lambda_a, f, data_path, AE_type, batch_size, loss=loss,
                       save_intermediate=save_intermediate, use_cuda=use_cuda, dataset=dataset)
 
     #summary(trainer.model, (3, 448, 448))
 
     start = time()
-    trainer.train(epochs, save_path=save_path, restart_from_scratch=restart_from_scratch)
+    trainer.train(epochs, save_path=save_path, restart_from_scratch=restart_from_scratch, iteration=iteration)
     tot_time = time() - start
 
     heatmaps, scores, gtmaps, labels, output = trainer.test()

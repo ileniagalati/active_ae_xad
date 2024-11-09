@@ -100,12 +100,12 @@ if __name__ == '__main__':
 
     for x in range(0, b):
         if x > 0:
-            epochs = 10
+            epochs = 1
 
 
         print(f"training on {x} iteration")
         heatmaps, scores, _,_, tot_time, output = training_active_aexad(data_path,epochs=epochs,dataset=ds,
-                                        lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l)
+                                        lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l, iteration=x)
 
         active_images=os.path.join(ret_path,"query",str(x))
         if not os.path.exists(active_images):
@@ -189,7 +189,7 @@ if __name__ == '__main__':
         os.makedirs(log_path)
     #training finale
     heatmaps, scores, _, _, tot_time, output = training_active_aexad(data_path,epochs=epochs,dataset=ds,
-                                        lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l)
+                                        lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, ret_path=ret_path, times=times, l=l, iteration=x)
     np.save(open(os.path.join(o, 'aexad_htmaps_f.npy'), 'wb'), heatmaps)
     np.save(open(os.path.join(o, 'aexad_scores_f.npy'), 'wb'), scores)
 
