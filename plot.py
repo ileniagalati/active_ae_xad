@@ -129,10 +129,6 @@ def plot_results_anom_top(path, method):
         plt.savefig(os.path.join(ret_path,"plot",f"gt_{i}.png"))
 
 
-import os
-import matplotlib.pyplot as plt
-
-
 def plot_iteration_results(path, it, model_type):
     Y = np.load(open(os.path.join(path, "output", "labels.npy"), 'rb'))
 
