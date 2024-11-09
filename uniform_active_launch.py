@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
     print("first lambda_u: ", lambda_u)
 
-    for x in range(1, b):
+    for x in range(0, b):
         if x > 0:
             epochs = 2
 
