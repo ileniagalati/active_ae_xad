@@ -1,3 +1,4 @@
+import math
 import os
 
 import torch.optim
@@ -89,7 +90,21 @@ class Trainer:
             self.model = self.model.cuda()
             self.criterion = self.criterion.cuda()
 
+    def calculate_better_anomaly_score(self, heatmap, image):
+        # Reshape per batch
+        heatmap_flat = heatmap.reshape((image.shape[0], -1))
 
+        # Calcola diversi tipi di score
+        mean_score = heatmap_flat.mean(axis=-1)
+        max_score = heatmap_flat.max(axis=-1)
+        std_score = heatmap_flat.std(axis=-1)
+
+        # Combina gli score
+        final_score = (0.4 * mean_score +
+                       0.4 * max_score +
+                       0.2 * std_score)
+
+        return final_score
 
     def test(self):
         self.model.eval()
@@ -101,6 +116,7 @@ class Trainer:
         gtmaps = []
         labels = []
         outputs = []
+        adv_scores = []
         for i, sample in enumerate(tbar):
             image= sample['image']
             label = sample['label']
@@ -113,19 +129,22 @@ class Trainer:
             image = image.cpu().numpy()
             heatmap = ((image-output) ** 2)#.numpy()
             score = heatmap.reshape((image.shape[0], -1)).mean(axis=-1)
+            adv_score = self.calculate_better_anomaly_score(heatmap, image)
             heatmaps.extend(heatmap)
             scores.extend(score)
             gtmaps.extend(gtmap.detach().numpy())
             labels.extend(label.detach().numpy())
             outputs.extend(output)
+            adv_scores.extend(adv_score)
 
         scores = np.array(scores)
         heatmaps = np.array(heatmaps)
         outputs = np.array(outputs)
+        adv_scores = np.array(adv_scores)
 
         #gtmaps = np.array(gtmaps)
         #labels = np.array(labels)
-        return heatmaps, scores, gtmaps, labels, outputs
+        return heatmaps, scores, gtmaps, labels, outputs, adv_scores
 
     def train(self, epochs, save_path='', restart_from_scratch=False, iteration=0):
         if isinstance(self.model, Conv_Autoencoder):
@@ -139,21 +158,43 @@ class Trainer:
         elif isinstance(self.model, Conv_Deep_Autoencoder):
             name = 'model_conv_deep'
 
-        latest_weights = os.path.join(save_path, 'latest_model_weights.pt')
-        if not restart_from_scratch and os.path.exists(latest_weights):
-            self.model.load_state_dict(torch.load(latest_weights))
+        save_latest_weights = os.path.join(os.path.dirname(save_path), str(iteration), f'latest_model_weights_{iteration}.pt')
+        print("save path: ", save_latest_weights)
+        load_latest_weights = os.path.join(os.path.dirname(save_path), str(iteration-1),  f'latest_model_weights_{iteration-1}.pt')
+        print("load path: ", load_latest_weights)
+
+        if not restart_from_scratch and os.path.exists(load_latest_weights):
+            self.model.load_state_dict(torch.load(load_latest_weights))
             print("starting training from last iteration model weights...")
         elif restart_from_scratch:
             print("starting training from scratch...")
 
-        if iteration > 0:
-            print("learning rate: ", self.optimizer.param_groups[0]['lr'])
-            for param_group in self.optimizer.param_groups:
-                param_group['lr'] = 0.001 * self.decay_factor
-        print("learning rate: ", self.optimizer.param_groups[0]['lr'])
+        initial_lr = 0.0001  # Learning rate iniziale
+
+        # Definisci il learning rate in base all'iterazione
+        if iteration == 0:
+            # Prima iterazione: cosine decay
+            def get_lr(epoch):
+                # Cosine decay da 0.001 a 0.0001
+                min_lr = initial_lr * 0.1
+                return min_lr + 0.5 * (initial_lr - min_lr) * (1 + math.cos(math.pi * epoch / epochs))
+        else:
+            # Iterazioni successive: learning rate fisso più basso
+            def get_lr(epoch):
+                return initial_lr  # LR fisso per fine-tuning
 
         self.model.train()
+        max_norm = 1.0
+        norm = []
         for epoch in range(epochs):
+
+            current_lr = get_lr(epoch)
+            for param_group in self.optimizer.param_groups:
+                param_group['lr'] = current_lr
+
+            if epoch == 0 or epoch == 9 or epoch > 490:
+                print(f"Iteration: {iteration}, Epoch: {epoch}, Learning rate: {current_lr:.6f}")
+
             train_loss = 0.0
             tbar = tqdm(self.train_loader, disable=self.silent)
             for i, sample in enumerate(tbar):
@@ -170,18 +211,29 @@ class Trainer:
                 loss = self.criterion(output, image, gtmap, label)
                 self.optimizer.zero_grad()
                 loss.backward()
+
+                #clipping
+                total_norm = torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=max_norm)
+                #total_norm = torch.norm(torch.stack([torch.norm(p.grad) for p in self.model.parameters() if p.grad is not None]))
+                norm.append(total_norm)
+                if i % 100 == 0:  # ogni 100 batch
+                    print(f"Gradient norm before clipping: {total_norm:.2f}, clipped to: {max_norm:.1f}")
+
+                    recent_norms = torch.tensor(norm[-100:])  # ultime 100 norme
+                    print(f"Average recent norm: {recent_norms.mean():.2f}")
+
                 self.optimizer.step()
 
                 train_loss += loss.item()
                 tbar.set_description('Epoch:%d, Train loss: %.3f' % (epoch, train_loss / (i + 1)))
 
-            # Salva pesi intermedi solo se specificato
+            '''# Salva pesi intermedi solo se specificato
             if self.save_intermediate and (epoch + 1) % 50 == 0:
-                torch.save(self.model.state_dict(), os.path.join(save_path, f'{name}_{epoch}.pt'))
+                torch.save(self.model.state_dict(), os.path.join(save_path, f'{name}_{epoch}.pt'))'''
 
         # Salva i pesi finali dell'iterazione di active learning
-        torch.save(self.model.state_dict(), latest_weights)
-        print(f"saving weights: {latest_weights}")
+        torch.save(self.model.state_dict(), save_latest_weights)
+        print(f"saving weights: {save_latest_weights}")
 
     def save_weights(self, filename):
         torch.save(self.model.state_dict(), os.path.join(filename))
@@ -201,9 +253,9 @@ def launch(data_path, epochs, batch_size, latent_dim, lambda_u, lambda_n, lambda
     trainer.train(epochs, save_path=save_path, restart_from_scratch=restart_from_scratch, iteration=iteration)
     tot_time = time() - start
 
-    heatmaps, scores, gtmaps, labels, output = trainer.test()
+    heatmaps, scores, gtmaps, labels, output, adv_scores = trainer.test()
 
-    return heatmaps, scores, gtmaps, labels, tot_time, output
+    return heatmaps, scores, gtmaps, labels, tot_time, output, adv_scores
 
 
 

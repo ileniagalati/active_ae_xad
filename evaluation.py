@@ -9,7 +9,7 @@ ds="mvtec"
 htmap_stats = []
 det_stats = []
 
-ret_path = "mvtec_results/weights/1.0/29"
+ret_path = "mvtec_results/epochs_1000_10_0.001_0.0001/weights/1.0/29"
 GT = np.load(open(os.path.join(ret_path,"output", 'gt.npy'), 'rb'))
 Y = np.load(open(os.path.join(ret_path,"output", 'labels.npy'), 'rb'))
 Y_test = np.load(open(os.path.join(ret_path,'test_data', 'Y_test.npy'), 'rb'))

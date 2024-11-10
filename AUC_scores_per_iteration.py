@@ -9,14 +9,14 @@ ds="mvtec"
 htmap_stats = []
 det_stats = []
 
-ret_path = "mvtec_results/colab/no_pure/weights/1.0/29"
+ret_path = "mvtec_results/test_500ep_clipto1/weights/1.0/29"
 GT = np.load(open(os.path.join(ret_path,"output", 'gt.npy'), 'rb'))
 Y = np.load(open(os.path.join(ret_path,"output", 'labels.npy'), 'rb'))
 #Y_test = np.load(open(os.path.join(ret_path,'test_data', 'Y_test.npy'), 'rb'))
 
-for i in range (0,5):
+for i in range (0,11):
 
-    if i==5:
+    if i==10:
         i='f'
 
     htmaps_aexad = np.load(open(os.path.join(ret_path,"output", f'aexad_htmaps_{i}.npy'), 'rb'))
