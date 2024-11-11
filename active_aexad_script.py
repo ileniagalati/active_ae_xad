@@ -124,6 +124,7 @@ class Trainer:
         #labels = np.array(labels)
         return heatmaps, scores, gtmaps, labels, outputs
 
+
     def train(self, epochs, save_path='', restart_from_scratch=False, iteration=0):
         if isinstance(self.model, Conv_Autoencoder):
             name = 'model_conv'
@@ -149,6 +150,7 @@ class Trainer:
 
         initial_lr = 0.001  # Learning rate iniziale
         initial_lr_it = initial_lr * 0.1
+        tot_epochs = epochs * 10 #TODO PARAMETRIZZARE CON IL NUMERO DI ITERAZIONI DI ACTIVE_LEARNING
         # Definisci il learning rate in base all'iterazione
         if iteration == 0:
             # Prima iterazione: cosine decay
@@ -161,7 +163,7 @@ class Trainer:
             def get_lr(epoch):
                 return initial_lr_it # LR fisso per fine-tuning
                 #min_lr = initial_lr_it * 0.1
-                #return min_lr + 0.5 * (initial_lr_it - min_lr) * (1 + math.cos(math.pi * epoch / epochs))
+                #return min_lr + 0.5 * (initial_lr_it - min_lr) * (1 + math.cos(math.pi * epoch / tot_epochs))
 
         self.model.train()
         max_norm = 1.0
@@ -192,15 +194,15 @@ class Trainer:
                 self.optimizer.zero_grad()
                 loss.backward()
 
-                '''#clipping
-                total_norm = torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=max_norm)
+                #clipping
+                #total_norm = torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=max_norm)
                 total_norm = torch.norm(torch.stack([torch.norm(p.grad) for p in self.model.parameters() if p.grad is not None]))
                 norm.append(total_norm)
                 if i % 100 == 0:  # ogni 100 batch
-                    print(f"Gradient norm before clipping: {total_norm:.2f}, clipped to: {max_norm:.1f}")
+                    #print(f"Gradient norm before clipping: {total_norm:.2f}, clipped to: {max_norm:.1f}")
 
                     recent_norms = torch.tensor(norm[-100:])  # ultime 100 norme
-                    print(f"Average recent norm: {recent_norms.mean():.2f}")'''
+                    print(f"Average recent norm: {recent_norms.mean():.2f}")
 
                 self.optimizer.step()
 
