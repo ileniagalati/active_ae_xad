@@ -132,15 +132,15 @@ def plot_results_anom_top(path, method):
 def plot_iteration_results(path, it, model_type):
     Y = np.load(open(os.path.join(path, "output", "labels.npy"), 'rb'))
 
-    for i in range(0,it+1):
+    for i in range(10,it+1):
         subpath=os.path.join(path, "plot",str(i))
         if not os.path.exists(subpath):
             os.makedirs(subpath)
-        '''if i==it:
-            i="f"'''
+        if i==it:
+            i="f"
 
         htmaps_aexad = np.load(open(os.path.join(os.path.join(path,"logs"), str(i), f'aexad_htmaps_{i}.npy'), 'rb'))
-        X_test = np.load(open(os.path.join(os.path.join(path,"test_data"), str(i), 'X_test.npy'), 'rb'))
+        X_test = np.load(open(os.path.join(os.path.join(path,"logs"), str(i), 'X_test.npy'), 'rb'))
         O = np.load(open(os.path.join(os.path.join(path,"logs"), str(i), f'output_{i}.npy'), 'rb'))
         print(len(X_test))
 
@@ -157,7 +157,7 @@ def plot_iteration_results(path, it, model_type):
                 plot_heatmap(htmaps_aexad[Y == 1][x])
                 plt.savefig(os.path.join(subpath, f"ht_{i}_{x}.png"))
 
-plot_iteration_results("mvtec_results/weights/1.0/29", 10, 'aaexad')
+plot_iteration_results("test_decay/weights/1.0/29", 10, 'aaexad')
 
 import os
 import matplotlib.pyplot as plt

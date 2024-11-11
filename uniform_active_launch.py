@@ -99,10 +99,11 @@ if __name__ == '__main__':
     print("first lambda_u: ", lambda_u)
 
     latest_weights_path=os.path.join(data_path,'latest_model_weights_0.pt')
+    #idx = [380, 393, 403, 413, 423, 360, 393, 401, 411, 421] #Indici per prendere immagini da classi bilanciate
 
     for x in range(0, b):
         if x > 0:
-            epochs = 10
+            epochs = 1
 
         '''if x==0 and os.path.exists(latest_weights_path):
             print("skipping iteration 0 due to existing training weights")
@@ -114,7 +115,7 @@ if __name__ == '__main__':
         if (x > 0 or x == 0) and not os.path.exists(os.path.join(data_path, f'latest_model_weights_{x}.pt')):
             print(f"training on {x} iteration")
             heatmaps, scores, _,_, tot_time, output = training_active_aexad(data_path=data_path,epochs=epochs,dataset=ds,
-                                            lambda_p=None, lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, save_path=data_path, times=times, l=l, iteration=x)
+                                           lambda_p=None, lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, save_path=data_path, times=times, l=l, iteration=x)
 
         data_path = os.path.join(data, str(x+1))
         if not os.path.exists(data_path):
@@ -124,29 +125,26 @@ if __name__ == '__main__':
         if not os.path.exists(active_images):
             os.makedirs(active_images)
 
-        log_path = os.path.join(ret_path,'logs',str(x))
 
-        if os.path.exists(log_path) and x == 0:
-            heatmaps = np.load(open(os.path.join(log_path, f'aexad_htmaps_{x}.npy'), 'rb'))
-            scores = np.load(open(os.path.join(log_path, f'aexad_scores_{x}.npy'), 'rb'))
-            output = np.load(open(os.path.join(log_path, f'output_{x}.npy'), 'rb'))
+        if os.path.exists(data_path) and x == 0:
+            heatmaps = np.load(open(os.path.join(data_path, f'aexad_htmaps_{x}.npy'), 'rb'))
+            scores = np.load(open(os.path.join(data_path, f'aexad_scores_{x}.npy'), 'rb'))
+            output = np.load(open(os.path.join(data_path, f'output_{x}.npy'), 'rb'))
 
-        if not os.path.exists(log_path):
-            os.makedirs(log_path)
+        if not os.path.exists(data_path):
+            os.makedirs(data_path)
 
-        np.save(open(os.path.join(log_path, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps)
-        np.save(open(os.path.join(log_path, f'aexad_scores_{x}.npy'), 'wb'), scores)
-        np.save(open(os.path.join(log_path, f'output_{x}.npy'), 'wb'), output)
-
-        np.save(open(os.path.join(o, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps)
-        np.save(open(os.path.join(o, f'aexad_scores_{x}.npy'), 'wb'), scores)
+        np.save(open(os.path.join(data_path, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps)
+        np.save(open(os.path.join(data_path, f'aexad_scores_{x}.npy'), 'wb'), scores)
+        np.save(open(os.path.join(data_path, f'output_{x}.npy'), 'wb'), output)
 
         idx = np.argsort(scores[Y_train == 0])[::-1]
+
         ext=".png"
         img="a"
-
         #query selection
         query = X_train[Y_train == 0][idx[0]]
+        print("idx: ", idx)
         img_to_save = Image.fromarray(query.astype(np.uint8))
         img_to_save.save(os.path.join(active_images, img+ext))
         #print("dim image: ", query.shape)
@@ -197,19 +195,16 @@ if __name__ == '__main__':
         print("anomalous lambda: ", lambda_a)
         #del idx[0]
 
-    log_path = os.path.join(ret_path, 'logs', "f")
-    if not os.path.exists(log_path):
-        os.makedirs(log_path)
+    data_path = os.path.join(data, str(x+1))
+    if not os.path.exists(data_path):
+        os.makedirs(data_path)
     #training finale
     heatmaps, scores, _, _, tot_time, output = training_active_aexad(data_path,epochs=epochs,dataset=ds,
-                                        lambda_p=None, lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, save_path=data_path, times=times, l=l, iteration=x)
-    np.save(open(os.path.join(o, 'aexad_htmaps_f.npy'), 'wb'), heatmaps)
-    np.save(open(os.path.join(o, 'aexad_scores_f.npy'), 'wb'), scores)
+                                        lambda_p=None, lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, save_path=data_path, times=times, l=l, iteration=x+1)
+    np.save(open(os.path.join(data_path, f'aexad_htmaps_{x+1}.npy'), 'wb'), heatmaps)
+    np.save(open(os.path.join(data_path, f'aexad_scores_{x+1}.npy'), 'wb'), scores)
+    np.save(open(os.path.join(data_path, f'output_{x+1}.npy'), 'wb'), output)
 
-    np.save(open(os.path.join(log_path, 'aexad_htmaps_f.npy'), 'wb'), heatmaps)
-    np.save(open(os.path.join(log_path, 'aexad_scores_f.npy'), 'wb'), scores)
-    np.save(open(os.path.join(log_path, 'output_f.npy'), 'wb'), output)
-
-    np.save(open(os.path.join(log_path, 'X_test.npy'), 'wb'), X_test)
-    np.save(open(os.path.join(log_path, 'Y_test.npy'), 'wb'), Y_test)
-    np.save(open(os.path.join(log_path, 'GT_test.npy'), 'wb'), GT_test)
+    np.save(open(os.path.join(data_path, 'X_test.npy'), 'wb'), X_test)
+    np.save(open(os.path.join(data_path, 'Y_test.npy'), 'wb'), Y_test)
+    np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
