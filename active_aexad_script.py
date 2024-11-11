@@ -75,7 +75,6 @@ class Trainer:
         else:
             raise Exception()
 
-        import torch.optim as optim
 
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
         self.decay_factor = 0.1
