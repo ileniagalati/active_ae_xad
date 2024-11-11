@@ -22,8 +22,6 @@ class MvtecAD(Dataset):
             transforms.PILToTensor()
         ])
 
-        print(f"loading dataset from {path}...")
-
         if self.train:
             split = 'train'
             x = np.load(os.path.join(path, f'X_{split}.npy'))  # / 255.0)[:,:,:,0]

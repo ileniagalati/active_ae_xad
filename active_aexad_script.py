@@ -147,7 +147,7 @@ class Trainer:
         elif restart_from_scratch:
             print("starting training from scratch...")
 
-        '''initial_lr = 0.0001  # Learning rate iniziale
+        initial_lr = 0.001  # Learning rate iniziale
 
         # Definisci il learning rate in base all'iterazione
         if iteration == 0:
@@ -159,20 +159,20 @@ class Trainer:
         else:
             # Iterazioni successive: learning rate fisso più basso
             def get_lr(epoch):
-                return initial_lr  # LR fisso per fine-tuning'''
+                return initial_lr * 0.1 # LR fisso per fine-tuning
 
         self.model.train()
         max_norm = 1.0
         norm = []
         for epoch in range(epochs):
 
-            '''current_lr = get_lr(epoch)
+            current_lr = get_lr(epoch)
             for param_group in self.optimizer.param_groups:
                 param_group['lr'] = current_lr
 
             if epoch == 0 or epoch == 9 or epoch > 490:
                 print(f"Iteration: {iteration}, Epoch: {epoch}, Learning rate: {current_lr:.6f}")
-'''
+
             train_loss = 0.0
             tbar = tqdm(self.train_loader, disable=self.silent)
             for i, sample in enumerate(tbar):
