@@ -54,6 +54,7 @@ class AAEXAD_loss(nn.Module):
                 0
             )
 
+
             # Applicazione dei pesi per ogni componente di loss
             loss_unlabeled = self.lambda_u * rec_unlabeled
             loss_normal = self.lambda_n * rec_normal
