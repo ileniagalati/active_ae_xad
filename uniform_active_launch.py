@@ -98,24 +98,7 @@ if __name__ == '__main__':
 
     print("first lambda_u: ", lambda_u)
 
-    def calculate_better_anomaly_score(self, heatmap, image):
-        # Reshape per batch
-        heatmap_flat = heatmap.reshape((image.shape[0], -1))
-
-        # Calcola diversi tipi di score
-        mean_score = heatmap_flat.mean(axis=-1)
-        max_score = heatmap_flat.max(axis=-1)
-        std_score = heatmap_flat.std(axis=-1)
-
-        # Combina gli score
-        final_score = (0.4 * mean_score +
-                       0.4 * max_score +
-                       0.2 * std_score)
-
-        return final_score
-
     latest_weights_path=os.path.join(data_path,'latest_model_weights_0.pt')
-    #idx = [380, 393, 403, 413, 423, 360, 393, 401, 411, 421] #Indici per prendere immagini da classi bilanciate
 
     for x in range(0, b):
         if x > 0:
@@ -130,8 +113,8 @@ if __name__ == '__main__':
 
         if (x > 0 or x == 0) and not os.path.exists(os.path.join(data_path, f'latest_model_weights_{x}.pt')):
             print(f"training on {x} iteration")
-            heatmaps, scores, _,_, tot_time, output, adv_scores = training_active_aexad(data_path=data_path,epochs=epochs,dataset=ds,
-                                            lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, save_path=data_path, times=times, l=l, iteration=x)
+            heatmaps, scores, _,_, tot_time, output = training_active_aexad(data_path=data_path,epochs=epochs,dataset=ds,
+                                            lambda_p=None, lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, save_path=data_path, times=times, l=l, iteration=x)
 
         data_path = os.path.join(data, str(x+1))
         if not os.path.exists(data_path):
@@ -159,14 +142,11 @@ if __name__ == '__main__':
         np.save(open(os.path.join(o, f'aexad_scores_{x}.npy'), 'wb'), scores)
 
         idx = np.argsort(scores[Y_train == 0])[::-1]
-        #idx = np.argsort(adv_scores[Y_train == 0])[::-1]
-
-
         ext=".png"
         img="a"
+
         #query selection
         query = X_train[Y_train == 0][idx[0]]
-        print("idx: ", idx)
         img_to_save = Image.fromarray(query.astype(np.uint8))
         img_to_save.save(os.path.join(active_images, img+ext))
         #print("dim image: ", query.shape)
@@ -221,8 +201,8 @@ if __name__ == '__main__':
     if not os.path.exists(log_path):
         os.makedirs(log_path)
     #training finale
-    heatmaps, scores, _, _, tot_time, output, _ = training_active_aexad(data_path,epochs=epochs,dataset=ds,
-                                        lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, save_path=data_path, times=times, l=l, iteration=x)
+    heatmaps, scores, _, _, tot_time, output = training_active_aexad(data_path,epochs=epochs,dataset=ds,
+                                        lambda_p=None, lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, save_path=data_path, times=times, l=l, iteration=x)
     np.save(open(os.path.join(o, 'aexad_htmaps_f.npy'), 'wb'), heatmaps)
     np.save(open(os.path.join(o, 'aexad_scores_f.npy'), 'wb'), scores)
 

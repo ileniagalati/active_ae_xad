@@ -4,11 +4,12 @@ import numpy as np
 
 class AAEXAD_loss(nn.Module):
 
-        def __init__(self, lambda_u, lambda_n, lambda_a, f, cuda):
+        def __init__(self, lambda_p, lambda_u, lambda_n, lambda_a, f, cuda):
             super().__init__()
             self.lambda_u = lambda_u
             self.lambda_n = lambda_n
             self.lambda_a = lambda_a
+            self.lambda_p = lambda_p
             self.f = f
             self.use_cuda = cuda
 
@@ -32,7 +33,6 @@ class AAEXAD_loss(nn.Module):
             rec_unlabeled = torch.where(y == 0, torch.sum((target - input) ** 2, dim=(1, 2, 3)), 0)
             rec_normal = torch.where(y == 1, torch.sum((target - input) ** 2, dim=(1, 2, 3)), 0)
 
-            # Modulo per il calcolo del contributo degli esempi anomali basato su gt
             if self.lambda_p is None:
                 lambda_p = torch.reshape(np.prod(gt.shape[1:]) / torch.sum(gt, dim=(1, 2, 3)), (-1, 1))
                 ones_v = torch.ones((gt.shape[0], np.prod(gt.shape[1:])))
@@ -47,20 +47,16 @@ class AAEXAD_loss(nn.Module):
                 if self.use_cuda:
                     lambda_p = lambda_p.cuda()
 
-            # Calcolo della ricostruzione anomala usando gt e pesatura
             rec_anomalous = torch.where(
                 y == -1,
                 torch.sum((1 - gt) * (target - input) ** 2 + lambda_p * gt * (self.f(input) - target) ** 2, dim=(1, 2, 3)),
                 0
             )
 
-
-            # Applicazione dei pesi per ogni componente di loss
             loss_unlabeled = self.lambda_u * rec_unlabeled
             loss_normal = self.lambda_n * rec_normal
             loss_anomalous = self.lambda_a * rec_anomalous
 
-            # Calcolo della loss totale
             total_loss = torch.sum(loss_unlabeled + loss_normal + loss_anomalous)
 
             return total_loss

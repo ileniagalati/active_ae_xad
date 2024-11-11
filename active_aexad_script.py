@@ -20,7 +20,7 @@ from aexad.mvtec_dataset import MvtecAD
 from brain_dataset import BrainDataset
 
 class Trainer:
-    def __init__(self, latent_dim, lambda_u, lambda_n, lambda_a, f, path, AE_type, batch_size=None, silent=False, use_cuda=True,
+    def __init__(self, latent_dim, lambda_p, lambda_u, lambda_n, lambda_a, f, path, AE_type, batch_size=None, silent=False, use_cuda=True,
                  loss='aexad', save_intermediate=False, dataset='mnist'):
         '''
         :param latent_dim:
@@ -76,34 +76,17 @@ class Trainer:
             raise Exception()
 
 
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
-        self.decay_factor = 0.1
+        self.optimizer = torch.optim.Adam(self.model.parameters())
         if loss == 'aexad':
             self.criterion = AEXAD_loss(lambda_n, lambda_a, f, self.cuda)
         if loss == 'aaexad':
-            self.criterion = AAEXAD_loss(lambda_u, lambda_n, lambda_a, f, self.cuda)
+            self.criterion = AAEXAD_loss(lambda_p, lambda_u, lambda_n, lambda_a, f, self.cuda)
         elif loss == 'mse':
             self.criterion = nn.MSELoss()
 
         if self.cuda:
             self.model = self.model.cuda()
             self.criterion = self.criterion.cuda()
-
-    def calculate_better_anomaly_score(self, heatmap, image):
-        # Reshape per batch
-        heatmap_flat = heatmap.reshape((image.shape[0], -1))
-
-        # Calcola diversi tipi di score
-        mean_score = heatmap_flat.mean(axis=-1)
-        max_score = heatmap_flat.max(axis=-1)
-        std_score = heatmap_flat.std(axis=-1)
-
-        # Combina gli score
-        final_score = (0.4 * mean_score +
-                       0.4 * max_score +
-                       0.2 * std_score)
-
-        return final_score
 
     def test(self):
         self.model.eval()
@@ -115,7 +98,6 @@ class Trainer:
         gtmaps = []
         labels = []
         outputs = []
-        adv_scores = []
         for i, sample in enumerate(tbar):
             image= sample['image']
             label = sample['label']
@@ -128,22 +110,19 @@ class Trainer:
             image = image.cpu().numpy()
             heatmap = ((image-output) ** 2)#.numpy()
             score = heatmap.reshape((image.shape[0], -1)).mean(axis=-1)
-            adv_score = self.calculate_better_anomaly_score(heatmap, image)
             heatmaps.extend(heatmap)
             scores.extend(score)
             gtmaps.extend(gtmap.detach().numpy())
             labels.extend(label.detach().numpy())
             outputs.extend(output)
-            adv_scores.extend(adv_score)
 
         scores = np.array(scores)
         heatmaps = np.array(heatmaps)
         outputs = np.array(outputs)
-        adv_scores = np.array(adv_scores)
 
         #gtmaps = np.array(gtmaps)
         #labels = np.array(labels)
-        return heatmaps, scores, gtmaps, labels, outputs, adv_scores
+        return heatmaps, scores, gtmaps, labels, outputs
 
     def train(self, epochs, save_path='', restart_from_scratch=False, iteration=0):
         if isinstance(self.model, Conv_Autoencoder):
@@ -168,7 +147,7 @@ class Trainer:
         elif restart_from_scratch:
             print("starting training from scratch...")
 
-        initial_lr = 0.0001  # Learning rate iniziale
+        '''initial_lr = 0.0001  # Learning rate iniziale
 
         # Definisci il learning rate in base all'iterazione
         if iteration == 0:
@@ -180,20 +159,20 @@ class Trainer:
         else:
             # Iterazioni successive: learning rate fisso più basso
             def get_lr(epoch):
-                return initial_lr  # LR fisso per fine-tuning
+                return initial_lr  # LR fisso per fine-tuning'''
 
         self.model.train()
         max_norm = 1.0
         norm = []
         for epoch in range(epochs):
 
-            current_lr = get_lr(epoch)
+            '''current_lr = get_lr(epoch)
             for param_group in self.optimizer.param_groups:
                 param_group['lr'] = current_lr
 
             if epoch == 0 or epoch == 9 or epoch > 490:
                 print(f"Iteration: {iteration}, Epoch: {epoch}, Learning rate: {current_lr:.6f}")
-
+'''
             train_loss = 0.0
             tbar = tqdm(self.train_loader, disable=self.silent)
             for i, sample in enumerate(tbar):
@@ -211,15 +190,15 @@ class Trainer:
                 self.optimizer.zero_grad()
                 loss.backward()
 
-                #clipping
+                '''#clipping
                 total_norm = torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=max_norm)
-                #total_norm = torch.norm(torch.stack([torch.norm(p.grad) for p in self.model.parameters() if p.grad is not None]))
+                total_norm = torch.norm(torch.stack([torch.norm(p.grad) for p in self.model.parameters() if p.grad is not None]))
                 norm.append(total_norm)
                 if i % 100 == 0:  # ogni 100 batch
                     print(f"Gradient norm before clipping: {total_norm:.2f}, clipped to: {max_norm:.1f}")
 
                     recent_norms = torch.tensor(norm[-100:])  # ultime 100 norme
-                    print(f"Average recent norm: {recent_norms.mean():.2f}")
+                    print(f"Average recent norm: {recent_norms.mean():.2f}")'''
 
                 self.optimizer.step()
 
@@ -241,9 +220,9 @@ class Trainer:
         self.model.load_state_dict(torch.load(filename))
 
 
-def launch(data_path, epochs, batch_size, latent_dim, lambda_u, lambda_n, lambda_a, f, AE_type, loss='aexad',
+def launch(data_path, epochs, batch_size, latent_dim, lambda_p, lambda_u, lambda_n, lambda_a, f, AE_type, loss='aexad',
            save_intermediate=False, save_path='', use_cuda=True, dataset='mnist', restart_from_scratch=False, iteration=0):
-    trainer = Trainer(latent_dim, lambda_u, lambda_n, lambda_a, f, data_path, AE_type, batch_size, loss=loss,
+    trainer = Trainer(latent_dim,lambda_p, lambda_u, lambda_n, lambda_a, f, data_path, AE_type, batch_size, loss=loss,
                       save_intermediate=save_intermediate, use_cuda=use_cuda, dataset=dataset)
 
     #summary(trainer.model, (3, 448, 448))
@@ -252,9 +231,9 @@ def launch(data_path, epochs, batch_size, latent_dim, lambda_u, lambda_n, lambda
     trainer.train(epochs, save_path=save_path, restart_from_scratch=restart_from_scratch, iteration=iteration)
     tot_time = time() - start
 
-    heatmaps, scores, gtmaps, labels, output, adv_scores = trainer.test()
+    heatmaps, scores, gtmaps, labels, output = trainer.test()
 
-    return heatmaps, scores, gtmaps, labels, tot_time, output, adv_scores
+    return heatmaps, scores, gtmaps, labels, tot_time, output
 
 
 
