@@ -9,7 +9,7 @@ ds="mvtec"
 htmap_stats = []
 det_stats = []
 
-ret_path = "mvtec_results/weights/1.0/29"
+ret_path = "mvtec_results/test_decay/weights/1.0/29"
 GT = np.load(open(os.path.join(ret_path,"output", 'gt.npy'), 'rb'))
 Y = np.load(open(os.path.join(ret_path,"output", 'labels.npy'), 'rb'))
 # sistemare la size delle gt
@@ -22,11 +22,8 @@ GT=gt_resized
 
 for i in range (0,11):
 
-    if i==10:
-        i='f'
-
-    htmaps_aexad = np.load(open(os.path.join(ret_path,"output", f'aexad_htmaps_{i}.npy'), 'rb'))
-    scores_aexad = np.load(open(os.path.join(ret_path,"output", f'aexad_scores_{i}.npy'), 'rb'))
+    htmaps_aexad = np.load(open(os.path.join(ret_path,"logs", str(i), f'aexad_htmaps_{i}.npy'), 'rb'))
+    scores_aexad = np.load(open(os.path.join(ret_path,"logs", str(i), f'aexad_scores_{i}.npy'), 'rb'))
 
     # explanation e detection
     htmap_stats.append(Xauc(GT[Y == 1], htmaps_aexad[Y == 1]))

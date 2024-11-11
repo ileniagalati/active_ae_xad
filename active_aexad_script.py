@@ -148,18 +148,20 @@ class Trainer:
             print("starting training from scratch...")
 
         initial_lr = 0.001  # Learning rate iniziale
-
+        initial_lr_it = initial_lr * 0.1
         # Definisci il learning rate in base all'iterazione
         if iteration == 0:
             # Prima iterazione: cosine decay
             def get_lr(epoch):
                 # Cosine decay da 0.001 a 0.0001
-                min_lr = initial_lr * 0.1
+                min_lr = initial_lr_it
                 return min_lr + 0.5 * (initial_lr - min_lr) * (1 + math.cos(math.pi * epoch / epochs))
         else:
             # Iterazioni successive: learning rate fisso più basso
             def get_lr(epoch):
-                return initial_lr * 0.1 # LR fisso per fine-tuning
+                return initial_lr_it # LR fisso per fine-tuning
+                #min_lr = initial_lr_it * 0.1
+                #return min_lr + 0.5 * (initial_lr_it - min_lr) * (1 + math.cos(math.pi * epoch / epochs))
 
         self.model.train()
         max_norm = 1.0
