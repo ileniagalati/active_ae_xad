@@ -1,2 +1,12 @@
 /mvtec_results/
-/datasets/
+/datasets/cable
+/datasets/capsule
+/datasets/carpet
+/datasets/grid
+/datasets/metal_nut
+/datasets/pill
+/datasets/screw
+/datasets/tile
+/datasets/toothbrush
+/datasets/transistor
+/datasets/zipper

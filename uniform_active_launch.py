@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
 
     X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT_expert, Y_expert = \
-            mvtec(5,dataset_path,10,seed=s)
+            mvtec(0,dataset_path,10,seed=s)
 
     if l:
         c="scratch"
