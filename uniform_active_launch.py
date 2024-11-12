@@ -101,8 +101,18 @@ if __name__ == '__main__':
     latest_weights_path=os.path.join(data_path,'latest_model_weights_0.pt')
 
     for x in range(0, b):
+        print("b1: ", b)
+
+        if(x == b):
+            break
         if x > 0:
             epochs = 20
+            n_examples = 1
+        if x == 0:
+            n_examples = int(b / 2)
+            print("n_examples: ", n_examples)
+            b = int(b/2)
+            print("b: ", b)
 
         if (x > 0 or x == 0) and not os.path.exists(os.path.join(data_path, f'latest_model_weights_{x}.pt')):
             print(f"training on {x} iteration")
@@ -133,35 +143,38 @@ if __name__ == '__main__':
 
         idx = np.argsort(scores[Y_train == 0])[::-1]
         ext=".png"
-        img="a"
+        #img="a"
 
-        #query selection
-        query = X_train[Y_train == 0][idx[0]]
-        img_to_save = Image.fromarray(query.astype(np.uint8))
-        img_to_save.save(os.path.join(active_images, img+ext))
-        #print("dim image: ", query.shape)
+        for ex in range (0,n_examples):
+            print("ex: ", ex)
+            img=f"{ex}"
+            #query selection
+            query = X_train[Y_train == 0][idx[0]]
+            img_to_save = Image.fromarray(query.astype(np.uint8))
+            img_to_save.save(os.path.join(active_images, img+ext))
+            #print("dim image: ", query.shape)
 
-        mask_images=os.path.join(ret_path,"mask",str(x))
-        if not os.path.exists(mask_images):
-            os.makedirs(mask_images)
+            mask_images=os.path.join(ret_path,"mask",str(x))
+            if not os.path.exists(mask_images):
+                os.makedirs(mask_images)
 
-        from_path=os.path.join(active_images,img+ext)
-        to_path=os.path.join(mask_images,img+"_mask"+ext)
+            from_path=os.path.join(active_images,img+ext)
+            to_path=os.path.join(mask_images,img+"_mask"+ext)
 
-        #generazione della maschera manuale
-        #run_mask_generation(from_path,to_path)
+            #generazione della maschera manuale
+            #run_mask_generation(from_path,to_path)
 
-        #generazione della maschera dal dataset etichettato
-        mask_from_gt = GT_expert[Y_train == 0][idx[0]]
-        mask_img = Image.fromarray(mask_from_gt.astype(np.uint8))
-        mask_img.save(to_path)
+            #generazione della maschera dal dataset etichettato
+            mask_from_gt = GT_expert[Y_train == 0][idx[0]]
+            mask_img = Image.fromarray(mask_from_gt.astype(np.uint8))
+            mask_img.save(to_path)
 
-        #aggiornamento del dataset
-        mask_img = Image.open(to_path)
-        mask_array = np.array(mask_img)
+            #aggiornamento del dataset
+            mask_img = Image.open(to_path)
+            mask_array = np.array(mask_img)
 
-        X_train, Y_train, GT_train, X_test, Y_test, GT_test = \
-            update_datasets(idx[0], mask_array, X_train, Y_train, GT_train)
+            X_train, Y_train, GT_train, X_test, Y_test, GT_test = \
+                update_datasets(idx[0], mask_array, X_train, Y_train, GT_train)
 
         #seleziono la frazione alpha di esempi per il training che minimizzano l'anomaly score
         X_pure, Y_pure, GT_pure, pure_indices = select_pure_samples(X_train, Y_train, GT_train,scores,purity)
