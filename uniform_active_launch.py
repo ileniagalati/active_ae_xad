@@ -102,7 +102,7 @@ if __name__ == '__main__':
 
     for x in range(0, b):
         if x > 0:
-            epochs = 10
+            epochs = 20
 
         if (x > 0 or x == 0) and not os.path.exists(os.path.join(data_path, f'latest_model_weights_{x}.pt')):
             print(f"training on {x} iteration")

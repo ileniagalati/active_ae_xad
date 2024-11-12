@@ -9,7 +9,7 @@ ds="mvtec"
 htmap_stats = []
 det_stats = []
 
-ret_path = "mvtec_results/250ep_decay_lr_10ep_iteration_15budget/weights/1.0/29"
+ret_path = "mvtec_results/500ep_decay_lr_20ep_iteration/weights/0.85/29"
 GT = np.load(open(os.path.join(ret_path,"output", 'gt.npy'), 'rb'))
 Y = np.load(open(os.path.join(ret_path,"output", 'labels.npy'), 'rb'))
 # sistemare la size delle gt

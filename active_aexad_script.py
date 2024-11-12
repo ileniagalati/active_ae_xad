@@ -150,7 +150,7 @@ class Trainer:
 
         initial_lr = 0.001  # Learning rate iniziale
         initial_lr_it = initial_lr * 0.1
-        tot_epochs = epochs * 10 #TODO PARAMETRIZZARE CON IL NUMERO DI ITERAZIONI DI ACTIVE_LEARNING
+        tot_epochs = epochs * 20 #TODO PARAMETRIZZARE CON IL NUMERO DI ITERAZIONI DI ACTIVE_LEARNING
         # Definisci il learning rate in base all'iterazione
         if iteration == 0:
             # Prima iterazione: cosine decay
@@ -202,7 +202,7 @@ class Trainer:
                     #print(f"Gradient norm before clipping: {total_norm:.2f}, clipped to: {max_norm:.1f}")
 
                     recent_norms = torch.tensor(norm[-100:])  # ultime 100 norme
-                    print(f"Average recent norm: {recent_norms.mean():.2f}")
+                    #print(f"Average recent norm: {recent_norms.mean():.2f}")
 
                 self.optimizer.step()
 
