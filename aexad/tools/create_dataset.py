@@ -2,9 +2,9 @@ import os
 import numpy as np
 from PIL import Image
 import PIL.Image as Image
-from tensorflow.keras.datasets import mnist
-from tensorflow.keras.datasets import fashion_mnist
-from tensorflow.keras.datasets import cifar10
+# tensorflow.keras.datasets import mnist
+#from tensorflow.keras.datasets import fashion_mnist
+#from tensorflow.keras.datasets import cifar10
 
 def square(dig,perc_anom_train = 0.2,perc_anom_test = 0.2,size = 5,intensity = 'rand',DATASET = 'mnist', seed=None):
     '''

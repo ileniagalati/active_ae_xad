@@ -9,7 +9,7 @@ ds="mvtec"
 htmap_stats = []
 det_stats = []
 
-ret_path = "mvtec_results/hazelnut/500ep_decay_lr_20ep_iteration/weights/0.85/29"
+ret_path = "mvtec_results/bottle/500ep_decay_lr_20ep_iteration/weights/1.0/29"
 GT = np.load(open(os.path.join(ret_path,"output", 'gt.npy'), 'rb'))
 Y = np.load(open(os.path.join(ret_path,"output", 'labels.npy'), 'rb'))
 # sistemare la size delle gt
@@ -20,7 +20,7 @@ for i in range(GT.shape[0]):
     gt_resized[i] = np.transpose(np.array(img_resized), (2, 0, 1))
 GT=gt_resized
 
-for i in range (0,11):
+for i in range (0,7):
 
     htmaps_aexad = np.load(open(os.path.join(ret_path,"logs", str(i), f'aexad_htmaps_{i}.npy'), 'rb'))
     scores_aexad = np.load(open(os.path.join(ret_path,"logs", str(i), f'aexad_scores_{i}.npy'), 'rb'))

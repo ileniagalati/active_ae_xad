@@ -14,7 +14,6 @@ import numpy as np
 from aexad.tools.utils import plot_image_tosave, plot_heatmap_tosave
 from active_utils import *
 
-
 import argparse
 import logging
 
@@ -29,17 +28,12 @@ if __name__ == '__main__':
     parser.add_argument('-ds', type=str, help='Dataset to use')
     parser.add_argument('-b', type=int, help='Budget')
     parser.add_argument('-e', type=int, help='Epochs to train')
+    parser.add_argument('-ie', type=int, help="epoche per le iterazioni dopo la prima")
     parser.add_argument('-s', type=int, help='Seed')
     parser.add_argument('-p', type=float, default=0.5, help='Purity parameter for active learning')
     parser.add_argument('-l', type=float, default=1, help='0: starting training from last iteration; 1: starting training from scratch')
     parser.add_argument('-r', type=str, default='results', help='Results path')
-    parser.add_argument('--debug', action='store_true', help="Attiva il debug mode")
     args = parser.parse_args()
-
-    if args.debug:
-        logging.basicConfig(level=logging.DEBUG)
-    else:
-        logging.basicConfig(level=logging.INFO)
 
     b = args.b
     epochs= args.e
@@ -47,6 +41,7 @@ if __name__ == '__main__':
     purity = args.p
     l=bool(args.l)
     root=args.r
+    it_epochs = args.ie
 
     dataset_path = args.ds
     ds = os.path.basename(dataset_path)
@@ -100,19 +95,23 @@ if __name__ == '__main__':
 
     latest_weights_path=os.path.join(data_path,'latest_model_weights_0.pt')
 
-    for x in range(0, b):
-        print("b1: ", b)
+    for x in range(0, b+1):
+        print("iterazione: ", x)
+        print("su iterazioni: ", b)
+        if(x == b+1):
+            print("stop a ")
 
-        if(x == b):
+            print(x)
+            print("su ", b)
             break
         if x > 0:
-            epochs = 20
-            n_examples = 1
+            epochs = it_epochs
+            n_query = 1
+            print("# di query: ", n_query)
         if x == 0:
-            n_examples = int(b / 2)
-            print("n_examples: ", n_examples)
+            n_query = int(b / 2)
+            print("# di query: ", n_query)
             b = int(b/2)
-            print("b: ", b)
 
         if (x > 0 or x == 0) and not os.path.exists(os.path.join(data_path, f'latest_model_weights_{x}.pt')):
             print(f"training on {x} iteration")
@@ -145,7 +144,7 @@ if __name__ == '__main__':
         ext=".png"
         #img="a"
 
-        for ex in range (0,n_examples):
+        for ex in range (0,n_query):
             print("ex: ", ex)
             img=f"{ex}"
             #query selection
@@ -200,21 +199,21 @@ if __name__ == '__main__':
         print("anomalous lambda: ", lambda_a)
         #del idx[0]
 
-    log_path = os.path.join(ret_path, 'logs', str(x+1))
+    log_path = os.path.join(ret_path, 'logs', str(x))
     if not os.path.exists(log_path):
         os.makedirs(log_path)
 
-    data_path = os.path.join(data, str(x + 1))
+    data_path = os.path.join(data, str(x))
     if not os.path.exists(data_path):
         os.makedirs(data_path)
 
     #training finale
     heatmaps, scores, _, _, tot_time, output = training_active_aexad(data_path,epochs=epochs,dataset=ds,
-                                        lambda_p=None, lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, save_path=data_path, times=times, l=l, iteration=x+1)
+                                        lambda_p=None, lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, save_path=data_path, times=times, l=l, iteration=x)
 
-    np.save(open(os.path.join(log_path, f'aexad_htmaps_{x+1}.npy'), 'wb'), heatmaps)
-    np.save(open(os.path.join(log_path, f'aexad_scores_{x+1}.npy'), 'wb'), scores)
-    np.save(open(os.path.join(log_path, f'output_{x+1}.npy'), 'wb'), output)
+    np.save(open(os.path.join(log_path, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps)
+    np.save(open(os.path.join(log_path, f'aexad_scores_{x}.npy'), 'wb'), scores)
+    np.save(open(os.path.join(log_path, f'output_{x}.npy'), 'wb'), output)
 
     np.save(open(os.path.join(data_path, 'X_test.npy'), 'wb'), X_test)
     np.save(open(os.path.join(data_path, 'Y_test.npy'), 'wb'), Y_test)
