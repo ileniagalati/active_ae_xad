@@ -132,7 +132,7 @@ def plot_results_anom_top(path, method):
 def plot_iteration_results(path, it, model_type):
     Y = np.load(open(os.path.join(path, "output", "labels.npy"), 'rb'))
 
-    for i in range(10,it+1):
+    for i in range(6,it+1):
         subpath=os.path.join(path, "plot",str(i))
         if not os.path.exists(subpath):
             os.makedirs(subpath)
@@ -154,7 +154,7 @@ def plot_iteration_results(path, it, model_type):
                 plot_heatmap(htmaps_aexad[Y == 1][x])
                 plt.savefig(os.path.join(subpath, f"ht_{i}_{x}.png"))
 
-plot_iteration_results("mvtec_results/hazelnut/500ep_decay_lr_20ep_iteration/weights/1.0/29", 10, 'aaexad')
+plot_iteration_results("mvtec_results/b_split/500ep_decay_lr_20ep_iteration/weights/1.0/29", 6, 'aaexad')
 
 import os
 import matplotlib.pyplot as plt

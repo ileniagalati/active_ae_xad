@@ -20,6 +20,7 @@ import logging
 
 
 
+
 if __name__ == '__main__':
 
     print("is cuda available: ",torch.cuda.is_available())
@@ -48,7 +49,7 @@ if __name__ == '__main__':
 
 
     X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT_expert, Y_expert = \
-            mvtec(0,dataset_path,10,seed=s)
+            mvtec(6,dataset_path,10,seed=s)
 
     if l:
         c="scratch"
@@ -140,11 +141,10 @@ if __name__ == '__main__':
         np.save(open(os.path.join(log_path, f'aexad_scores_{x}.npy'), 'wb'), scores)
         np.save(open(os.path.join(log_path, f'output_{x}.npy'), 'wb'), output)
 
-        idx = np.argsort(scores[Y_train == 0])[::-1]
-        ext=".png"
-        #img="a"
-
         for ex in range (0,n_query):
+            idx = np.argsort(scores[Y_train == 0])[::-1]
+            ext=".png"
+            #img="a"
             print("ex: ", ex)
             img=f"{ex}"
             #query selection
@@ -191,13 +191,15 @@ if __name__ == '__main__':
         #update dei valori dei pesi della loss e normalizzazione degli stessi, sum=1
         n = len(X_pure)
         lambda_u = n / np.sum(Y_pure == 0) if np.sum(Y_pure == 0) > 0 else 0
+        ''' lambda_n = min(50, n / np.sum(Y_pure == 1)) if np.sum(Y_pure == 1) > 0 else 0
+        lambda_a = min(50, n / np.sum(Y_pure == -1)) if np.sum(Y_pure == -1) > 0 else 0'''
+
         lambda_n = n / np.sum(Y_pure == 1) if np.sum(Y_pure == 1) > 0 else 0
         lambda_a = n / np.sum(Y_pure == -1) if np.sum(Y_pure == -1) > 0 else 0
 
         print("unlabeled lambda: ", lambda_u)
         print("normal lambda: ", lambda_n)
         print("anomalous lambda: ", lambda_a)
-        #del idx[0]
 
     log_path = os.path.join(ret_path, 'logs', str(x))
     if not os.path.exists(log_path):
