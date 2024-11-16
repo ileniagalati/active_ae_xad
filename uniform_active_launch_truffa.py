@@ -101,6 +101,7 @@ if __name__ == '__main__':
         print("su iterazioni: ", b)
         if(x == b+1):
             print("stop a ")
+
             print(x)
             print("su ", b)
             break
@@ -115,7 +116,8 @@ if __name__ == '__main__':
 
         if (x > 0 or x == 0) and not os.path.exists(os.path.join(data_path, f'latest_model_weights_{x}.pt')):
             print(f"training on {x} iteration")
-            heatmaps, scores, _,_, tot_time, output = training_active_aexad(data_path=data_path,epochs=epochs,dataset=ds,
+            if(x!=0):
+                heatmaps, scores, _,_, tot_time, output = training_active_aexad(data_path=data_path,epochs=epochs,dataset=ds,
                                             lambda_p=None, lambda_u = lambda_u, lambda_n = lambda_n, lambda_a = lambda_a, save_path=data_path, times=times, l=l, iteration=x)
 
         data_path = os.path.join(data, str(x+1))
@@ -136,13 +138,16 @@ if __name__ == '__main__':
         if not os.path.exists(log_path):
             os.makedirs(log_path)
 
-        np.save(open(os.path.join(log_path, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps)
-        np.save(open(os.path.join(log_path, f'aexad_scores_{x}.npy'), 'wb'), scores)
-        np.save(open(os.path.join(log_path, f'output_{x}.npy'), 'wb'), output)
+        if x!=0:
+            np.save(open(os.path.join(log_path, f'aexad_htmaps_{x}.npy'), 'wb'), heatmaps)
+            np.save(open(os.path.join(log_path, f'aexad_scores_{x}.npy'), 'wb'), scores)
+            np.save(open(os.path.join(log_path, f'output_{x}.npy'), 'wb'), output)
 
+        #idx = [240, 250, 260, 270, 280, 289]
+        idx = np.argsort(scores[Y_train == 0])[::-1]
         for ex in range (0,n_query):
-
-            idx = np.argsort(scores[Y_train == 0])[::-1]
+            #if x>0:
+                #idx = np.argsort(scores[Y_train == 0])[::-1]
             ext=".png"
             #img="a"
             print("ex: ", ex)
@@ -175,11 +180,19 @@ if __name__ == '__main__':
             X_train, Y_train, GT_train, X_test, Y_test, GT_test = \
                 update_datasets(idx[0], mask_array, X_train, Y_train, GT_train)
 
+            '''if x==0:
+                print("idx pre delete: ", idx)
+                idx = idx[1:]
+                print("idx post delete: ",idx)'''
 
         #seleziono la frazione alpha di esempi per il training che minimizzano l'anomaly score
-        X_pure, Y_pure, GT_pure, pure_indices = select_pure_samples(X_train, Y_train, GT_train,scores,purity)
+        #X_pure, Y_pure, GT_pure, pure_indices = select_pure_samples(X_train, Y_train, GT_train,scores,purity)
 
-        print(f"training on alpha = {purity} fraction of examples: ", len(pure_indices))
+        #print(f"training on alpha = {purity} fraction of examples: ", len(pure_indices))
+
+        X_pure=X_train
+        Y_pure = Y_train
+        GT_pure = GT_train
 
         np.save(open(os.path.join(data_path, f'X_train.npy'), 'wb'), X_pure)
         np.save(open(os.path.join(data_path, f'Y_train.npy'), 'wb'), Y_pure)

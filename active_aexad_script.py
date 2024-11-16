@@ -148,11 +148,11 @@ class Trainer:
         elif restart_from_scratch:
             print("starting training from scratch...")
 
-        '''initial_lr = 0.001  # Learning rate iniziale
-        initial_lr_it = initial_lr * 0.1
+        initial_lr = 0.001  # Learning rate iniziale delle iterazioni
+        initial_lr_it = initial_lr * 0.5
         tot_epochs = epochs * 20
         # Definisci il learning rate in base all'iterazione
-        if iteration == 0:
+        if iteration < 2:
             # Prima iterazione: cosine decay
             def get_lr(epoch):
                 # Cosine decay da 0.001 a 0.0001
@@ -163,7 +163,7 @@ class Trainer:
             def get_lr(epoch):
                 return initial_lr_it
                 #min_lr = initial_lr_it * 0.1
-                #return min_lr + 0.5 * (initial_lr_it - min_lr) * (1 + math.cos(math.pi * epoch / tot_epochs))'''
+                #return min_lr + 0.5 * (initial_lr_it - min_lr) * (1 + math.cos(math.pi * epoch / tot_epochs))
 
         self.model.train()
         max_norm = 1.0
@@ -172,12 +172,12 @@ class Trainer:
 
         for epoch in range(epochs):
 
-            '''current_lr = get_lr(epoch)
+            current_lr = get_lr(epoch)
             for param_group in self.optimizer.param_groups:
                 param_group['lr'] = current_lr
 
             if epoch == 0 or epoch == 9 or epoch > 490:
-                print(f"Iteration: {iteration}, Epoch: {epoch}, Learning rate: {current_lr:.6f}")'''
+                print(f"Iteration: {iteration}, Epoch: {epoch}, Learning rate: {current_lr:.6f}")
 
             train_loss = 0.0
             tbar = tqdm(self.train_loader, disable=self.silent)

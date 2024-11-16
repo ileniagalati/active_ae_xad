@@ -265,7 +265,7 @@ def mvtec(cl, path, n_anom_per_cls, seed=29):
             continue
         if cl_a == '.DS_Store':
             continue
-
+        print(f"adding {cl_a}")
         outlier_file = np.array(os.listdir(os.path.join(outlier_data_dir, cl_a)))
         idxs = np.random.permutation(len(outlier_file))
 
