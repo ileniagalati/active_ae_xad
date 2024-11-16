@@ -261,7 +261,9 @@ def mvtec(cl, path, n_anom_per_cls, seed=29):
     outlier_data_dir = os.path.join(root, 'test')
     outlier_classes = os.listdir(outlier_data_dir)
     for cl_a in outlier_classes:
+        print(f"adding {cl_a} anomalies")
         if cl_a == 'good':
+            print(f"skipping {cl_a} anomalies")
             continue
         if cl_a == '.DS_Store':
             continue

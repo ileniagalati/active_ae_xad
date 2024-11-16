@@ -101,6 +101,7 @@ if __name__ == '__main__':
         print("su iterazioni: ", b)
         if(x == b+1):
             print("stop a ")
+
             print(x)
             print("su ", b)
             break
@@ -141,7 +142,6 @@ if __name__ == '__main__':
         np.save(open(os.path.join(log_path, f'output_{x}.npy'), 'wb'), output)
 
         for ex in range (0,n_query):
-
             idx = np.argsort(scores[Y_train == 0])[::-1]
             ext=".png"
             #img="a"
@@ -174,7 +174,6 @@ if __name__ == '__main__':
 
             X_train, Y_train, GT_train, X_test, Y_test, GT_test = \
                 update_datasets(idx[0], mask_array, X_train, Y_train, GT_train)
-
 
         #seleziono la frazione alpha di esempi per il training che minimizzano l'anomaly score
         X_pure, Y_pure, GT_pure, pure_indices = select_pure_samples(X_train, Y_train, GT_train,scores,purity)
