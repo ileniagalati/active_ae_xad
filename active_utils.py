@@ -57,3 +57,44 @@ def update_datasets(image_idx, mask_array, X_train, Y_train, GT_train):
 
 def run_mask_generation(from_path,to_path):
     subprocess.run(["python3", "MaskGenerator.py" ,"-from_path",from_path,"-to_path",to_path])
+
+
+import numpy as np
+import random
+
+def kmeans_plus_plus_selection(X_train, n_queries, temperature=1.0):
+    """
+    Selects `n_queries` samples using k-means++ from the dataset `X_train`.
+
+    Args:
+        X_train (np.array): The input dataset (only unlabeled images).
+        n_queries (int): The number of queries to select.
+        temperature (float): Controls the diversity of selection (tau in the formula).
+
+    Returns:
+        query_indices (list): List of indices of the selected query samples.
+    """
+    n_samples = len(X_train)
+
+    # Step 1: Randomly initialize the first sample
+    initial_index = random.choice(range(n_samples))
+    query_indices = [initial_index]
+
+    # Step 2: Iterate and select other samples based on k-means++ strategy
+    for _ in range(n_queries - 1):
+        # Compute distances from each sample to the nearest selected sample
+        distances = np.array(
+            [np.min([np.linalg.norm(X_train[i] - X_train[j]) for j in query_indices]) for i in range(n_samples)])
+
+        # Compute the probability distribution for selecting the next sample
+        distances = distances ** 2  # Use squared distances to match k-means++
+        probabilities = distances / np.sum(distances)
+
+        # Apply temperature scaling (softmax)
+        probabilities = np.exp(probabilities / temperature) / np.sum(np.exp(probabilities / temperature))
+
+        # Select the next query sample based on the computed probabilities
+        next_index = np.random.choice(range(n_samples), p=probabilities)
+        query_indices.append(next_index)
+
+    return query_indices
