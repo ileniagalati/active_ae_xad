@@ -37,6 +37,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     b = args.b
+    b_0 = b
     epochs= args.e
     s = args.s
     purity = args.p
@@ -99,32 +100,35 @@ if __name__ == '__main__':
     for x in range(0, b+1):
         print("iterazione: ", x)
         print("su iterazioni: ", b)
-        if(x == b+1):
+        if (x == b+1):
             print("stop a ")
-
             print(x)
             print("su ", b)
             break
         if x == 1:
             epochs = it_epochs
-            n_query = int(b/3)
+            n_query = int(b_0/3)
             print("# di query: ", n_query)
-            b = int((2 * b) / 3)
+            b = b - n_query
             print("budget rimanente: ", b)
+            b=b+2
         if x > 1:
             epochs = it_epochs
             n_query = 1
             print("# di query: ", n_query)
         if x == 0:
             n_query = int(b/3)
+            b = b_0 - n_query
             print("Selezionando query diverse per l'iterazione 0 usando k-means++...")
 
-            # Convert the dataset into the format for sampling
-            X_flat = X_train.reshape(len(X_train), -1)  # Flatten images if necessary
+            X_flat = X_train.reshape(len(X_train), -1)
 
-            # Choose between `init_centers` and `Kmeans_dist`
-            #sample_indices = init_centers(X_flat, n_query)  # Using `init_centers`
+            # sample_indices = init_centers(X_flat, n_query)
             query_indices = Kmeans_dist(torch.tensor(X_flat), n_query, tau=0.1)
+
+            data_path = os.path.join(data, str(x + 1))
+            if not os.path.exists(data_path):
+                os.makedirs(data_path)
 
             # Salva le immagini query selezionate
             active_images = os.path.join(ret_path, "query", str(x))
@@ -147,11 +151,27 @@ if __name__ == '__main__':
                 mask_img.save(os.path.join(mask_images, f"{ex}_mask.png"))
 
             # Aggiorna i dataset
-            for idx in query_indices:
+            for ex, idx in enumerate(query_indices):
                 mask_img = Image.open(os.path.join(mask_images, f"{ex}_mask.png"))
                 mask_array = np.array(mask_img)
                 X_train, Y_train, GT_train, X_test, Y_test, GT_test = update_datasets(idx, mask_array, X_train, Y_train,
                                                                                       GT_train)
+                np.save(open(os.path.join(data_path, f'X_train.npy'), 'wb'), X_train)
+                np.save(open(os.path.join(data_path, f'Y_train.npy'), 'wb'), Y_train)
+                np.save(open(os.path.join(data_path, f'GT_train.npy'), 'wb'), GT_train)
+
+                np.save(open(os.path.join(data_path, 'X_test.npy'), 'wb'), X_test)
+                np.save(open(os.path.join(data_path, 'Y_test.npy'), 'wb'), Y_test)
+                np.save(open(os.path.join(data_path, 'GT_test.npy'), 'wb'), GT_test)
+
+                n = len(X_train)
+                lambda_u = n / np.sum(Y_train == 0) if np.sum(Y_train == 0) > 0 else 0
+                lambda_n = n / np.sum(Y_train == 1) if np.sum(Y_train == 1) > 0 else 0
+                lambda_a = n / np.sum(Y_train == -1) if np.sum(Y_train == -1) > 0 else 0
+
+                print("unlabeled lambda: ", lambda_u)
+                print("normal lambda: ", lambda_n)
+                print("anomalous lambda: ", lambda_a)
 
             # Procedi con l'addestramento per l'iterazione 0
             print("Avviando l'addestramento sulla base delle query selezionate...")
@@ -186,20 +206,12 @@ if __name__ == '__main__':
             # update dei valori dei pesi della loss e normalizzazione degli stessi, sum=1
             n = len(X_pure)
             lambda_u = n / np.sum(Y_pure == 0) if np.sum(Y_pure == 0) > 0 else 0
-            ''' lambda_n = min(50, n / np.sum(Y_pure == 1)) if np.sum(Y_pure == 1) > 0 else 0
-            lambda_a = min(50, n / np.sum(Y_pure == -1)) if np.sum(Y_pure == -1) > 0 else 0'''
-
             lambda_n = n / np.sum(Y_pure == 1) if np.sum(Y_pure == 1) > 0 else 0
             lambda_a = n / np.sum(Y_pure == -1) if np.sum(Y_pure == -1) > 0 else 0
 
             print("unlabeled lambda: ", lambda_u)
             print("normal lambda: ", lambda_n)
             print("anomalous lambda: ", lambda_a)
-            '''if x == 0:
-            n_query = int(b / 2)
-            print("# di query: ", n_query)
-            b = int(b/2)'''
-
             continue
 
         if (x > 0 or x == 0) and not os.path.exists(os.path.join(data_path, f'latest_model_weights_{x}.pt')):

@@ -1,4 +1,6 @@
 import os
+import pdb
+
 from active_aexad_script import launch as launch_aexad
 import numpy as np
 import subprocess
@@ -94,6 +96,7 @@ def init_centers(X, K):
 
 def Kmeans_dist(embs, K, tau=0.1):
     idx_active = []
+    embs = embs.to(torch.float32)
     dist_matrix = torch.cdist(embs, embs, p=2).cpu().numpy()
     dist_matrix = (dist_matrix - dist_matrix.min()) / (dist_matrix.max() - dist_matrix.min())
     dist_matrix = dist_matrix.astype(np.float64)
