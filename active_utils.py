@@ -1,6 +1,7 @@
 import os
 from active_aexad_script import launch as launch_aexad
 import numpy as np
+import subprocess
 
 def f(x):
     return 1 - x
@@ -53,3 +54,6 @@ def update_datasets(image_idx, mask_array, X_train, Y_train, GT_train):
     GT_test = GT_train
 
     return X_train, Y_train, GT_train, X_test, Y_test, GT_test
+
+def run_mask_generation(from_path,to_path):
+    subprocess.run(["python3", "MaskGenerator.py" ,"-from_path",from_path,"-to_path",to_path])

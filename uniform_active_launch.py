@@ -142,11 +142,16 @@ if __name__ == '__main__':
         np.save(open(os.path.join(log_path, f'output_{x}.npy'), 'wb'), output)
 
         for ex in range (0,n_query):
-            idx = np.argsort(scores[Y_train == 0])[::-1]
+            if (ex <= n_query/2):
+                idx = np.argsort(scores[Y_train == 0])[::-1]
+                print("ex: ", ex, "con errore piu alto")
+            elif (ex > n_query/2):
+                idx = np.argsort(scores[Y_train == 0])
+                print("ex: ", ex, "con errore piu basso")
+
             ext=".png"
-            #img="a"
-            print("ex: ", ex)
             img=f"{ex}"
+
             #query selection
             query = X_train[Y_train == 0][idx[0]]
             img_to_save = Image.fromarray(query.astype(np.uint8))
@@ -171,6 +176,7 @@ if __name__ == '__main__':
             #aggiornamento del dataset
             mask_img = Image.open(to_path)
             mask_array = np.array(mask_img)
+            #mask_array = np.stack([mask_array] * 3, axis=-1) #TODO: in caso di generazione delle maschere da dataset etichettato, commenta
 
             X_train, Y_train, GT_train, X_test, Y_test, GT_test = \
                 update_datasets(idx[0], mask_array, X_train, Y_train, GT_train)
