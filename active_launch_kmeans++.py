@@ -119,11 +119,12 @@ if __name__ == '__main__':
             n_query = int(b/3)
             print("Selezionando query diverse per l'iterazione 0 usando k-means++...")
 
-            # Selezioniamo solo le immagini normali (Y_train == 0)
-            normal_images = X_train[Y_train == 0]
+            # Convert the dataset into the format for sampling
+            X_flat = X_train.reshape(len(X_train), -1)  # Flatten images if necessary
 
-            # Selezioniamo le query tramite k-means++
-            query_indices = kmeans_plus_plus_selection(normal_images, n_queries=n_query, temperature=0.5)
+            # Choose between `init_centers` and `Kmeans_dist`
+            #sample_indices = init_centers(X_flat, n_query)  # Using `init_centers`
+            query_indices = Kmeans_dist(torch.tensor(X_flat), n_query, tau=0.1)
 
             # Salva le immagini query selezionate
             active_images = os.path.join(ret_path, "query", str(x))

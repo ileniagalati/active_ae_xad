@@ -2,6 +2,9 @@ import os
 from active_aexad_script import launch as launch_aexad
 import numpy as np
 import subprocess
+import torch
+from scipy import stats
+from sklearn.metrics import pairwise_distances
 
 def f(x):
     return 1 - x
@@ -59,42 +62,54 @@ def run_mask_generation(from_path,to_path):
     subprocess.run(["python3", "MaskGenerator.py" ,"-from_path",from_path,"-to_path",to_path])
 
 
-import numpy as np
-import random
+def init_centers(X, K):
+    ind = np.argmax([np.linalg.norm(s, 2) for s in X])
+    mu = [X[ind]]
+    indsAll = [ind]
+    centInds = [0.] * len(X)
+    cent = 0
+    print('#Samps\tTotal Distance')
+    while len(mu) < K:
+        if len(mu) == 1:
+            D2 = pairwise_distances(X, mu).ravel().astype(float)
+        else:
+            newD = pairwise_distances(X, [mu[-1]]).ravel().astype(float)
+            for i in range(len(X)):
+                if D2[i] > newD[i]:
+                    centInds[i] = cent
+                    D2[i] = newD[i]
+        print(str(len(mu)) + '\t' + str(sum(D2)), flush=True)
+        if sum(D2) == 0.0:
+            pdb.set_trace()
+        D2 = D2.ravel().astype(float)
+        Ddist = (D2 ** 2) / sum(D2 ** 2)
+        customDist = stats.rv_discrete(name='custm', values=(np.arange(len(D2)), Ddist))
+        ind = customDist.rvs(size=1)[0]
+        while ind in indsAll:
+            ind = customDist.rvs(size=1)[0]
+        mu.append(X[ind])
+        indsAll.append(ind)
+        cent += 1
+    return indsAll
 
-def kmeans_plus_plus_selection(X_train, n_queries, temperature=1.0):
-    """
-    Selects `n_queries` samples using k-means++ from the dataset `X_train`.
+def Kmeans_dist(embs, K, tau=0.1):
+    idx_active = []
+    dist_matrix = torch.cdist(embs, embs, p=2).cpu().numpy()
+    dist_matrix = (dist_matrix - dist_matrix.min()) / (dist_matrix.max() - dist_matrix.min())
+    dist_matrix = dist_matrix.astype(np.float64)
+    dist_matrix = np.exp(dist_matrix / tau)
+    idx_ = np.argmin(np.mean(dist_matrix, 0))
 
-    Args:
-        X_train (np.array): The input dataset (only unlabeled images).
-        n_queries (int): The number of queries to select.
-        temperature (float): Controls the diversity of selection (tau in the formula).
+    idx_active.append(idx_)
 
-    Returns:
-        query_indices (list): List of indices of the selected query samples.
-    """
-    n_samples = len(X_train)
+    while len(idx_active) < K:
+        p = dist_matrix[idx_active].min(0)
+        p = p / p.sum()
 
-    # Step 1: Randomly initialize the first sample
-    initial_index = random.choice(range(n_samples))
-    query_indices = [initial_index]
+        customDist = stats.rv_discrete(name='custm', values=(np.arange(len(p)), p))
+        idx_ = customDist.rvs(size=1)[0]
+        while idx_ in idx_active:
+            idx_ = customDist.rvs(size=1)[0]
+        idx_active.append(idx_)
 
-    # Step 2: Iterate and select other samples based on k-means++ strategy
-    for _ in range(n_queries - 1):
-        # Compute distances from each sample to the nearest selected sample
-        distances = np.array(
-            [np.min([np.linalg.norm(X_train[i] - X_train[j]) for j in query_indices]) for i in range(n_samples)])
-
-        # Compute the probability distribution for selecting the next sample
-        distances = distances ** 2  # Use squared distances to match k-means++
-        probabilities = distances / np.sum(distances)
-
-        # Apply temperature scaling (softmax)
-        probabilities = np.exp(probabilities / temperature) / np.sum(np.exp(probabilities / temperature))
-
-        # Select the next query sample based on the computed probabilities
-        next_index = np.random.choice(range(n_samples), p=probabilities)
-        query_indices.append(next_index)
-
-    return query_indices
+    return idx_active
