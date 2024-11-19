@@ -49,7 +49,13 @@ if __name__ == '__main__':
 
 
     X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT_expert, Y_expert = \
-            mvtec(6,dataset_path,10,seed=s)
+            mvtec(5,dataset_path,10,seed=s)
+
+           # labels = (
+           #     'bottle', 'cable', 'capsule', 'carpet', 'grid', 'hazelnut', 'leather',
+           #     'metal_nut', 'pill', 'screw', 'tile', 'toothbrush', 'transistor',
+           #     'wood', 'zipper'
+           # )
 
     if l:
         c="scratch"
@@ -101,14 +107,14 @@ if __name__ == '__main__':
         print("su iterazioni: ", b)
         if(x == b+1):
             print("stop a ")
-
             print(x)
             print("su ", b)
             break
         if x > 0:
             epochs = it_epochs
-            n_query = 1
+            n_query = 2
             print("# di query: ", n_query)
+            b = b - n_query
         if x == 0:
             n_query = int(b / 2)
             print("# di query: ", n_query)
@@ -142,10 +148,10 @@ if __name__ == '__main__':
         np.save(open(os.path.join(log_path, f'output_{x}.npy'), 'wb'), output)
 
         for ex in range (0,n_query):
-            if (ex <= n_query/2):
+            if (ex < n_query/2):
                 idx = np.argsort(scores[Y_train == 0])[::-1]
                 print("ex: ", ex, "con errore piu alto")
-            elif (ex > n_query/2):
+            elif (ex >= n_query/2):
                 idx = np.argsort(scores[Y_train == 0])
                 print("ex: ", ex, "con errore piu basso")
 

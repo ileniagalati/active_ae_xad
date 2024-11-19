@@ -3,6 +3,7 @@ import os
 
 import torch.optim
 import torch.nn as nn
+import torch.nn.init as init
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import numpy as np
@@ -124,7 +125,6 @@ class Trainer:
         #labels = np.array(labels)
         return heatmaps, scores, gtmaps, labels, outputs
 
-
     def train(self, epochs, save_path='', restart_from_scratch=False, iteration=0):
         if isinstance(self.model, Conv_Autoencoder):
             name = 'model_conv'
@@ -152,7 +152,7 @@ class Trainer:
         initial_lr_it = initial_lr * 0.5
         tot_epochs = epochs * 20
         # Definisci il learning rate in base all'iterazione
-        if iteration < 2:
+        if iteration < 0: #2
             # Prima iterazione: cosine decay
             def get_lr(epoch):
                 # Cosine decay da 0.001 a 0.0001
@@ -161,7 +161,7 @@ class Trainer:
         else:
             # Iterazioni successive: learning rate fisso più basso
             def get_lr(epoch):
-                return initial_lr_it
+                return initial_lr #_it
                 #min_lr = initial_lr_it * 0.1
                 #return min_lr + 0.5 * (initial_lr_it - min_lr) * (1 + math.cos(math.pi * epoch / tot_epochs))
 

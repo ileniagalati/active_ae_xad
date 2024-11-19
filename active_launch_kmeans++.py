@@ -50,7 +50,13 @@ if __name__ == '__main__':
 
 
     X_train, Y_train, GT_train, X_test, Y_test, GT_test, GT_expert, Y_expert = \
-            mvtec(5,dataset_path,10,seed=s)
+            mvtec(0,dataset_path,10,seed=s)
+
+    # labels = (
+    #     'bottle', 'cable', 'capsule', 'carpet', 'grid', 'hazelnut', 'leather',
+    #     'metal_nut', 'pill', 'screw', 'tile', 'toothbrush', 'transistor',
+    #     'wood', 'zipper'
+    # )
 
     if l:
         c="scratch"
@@ -123,40 +129,64 @@ if __name__ == '__main__':
             b=int(b/2)
             print("Selezionando query diverse per l'iterazione 0 usando k-means++...")
 
-            X_flat = X_train.reshape(len(X_train), -1)
-
             # sample_indices = init_centers(X_flat, n_query)
-            query_indices = Kmeans_dist(torch.tensor(X_flat), n_query, tau=0.1)
+            #query_indices = Kmeans_dist(torch.tensor(X_flat), n_query, tau=0.1)
+            tau=0.1
+            idx_active=[]
 
-            data_path = os.path.join(data, str(x + 1))
-            if not os.path.exists(data_path):
-                os.makedirs(data_path)
+            X_flat_0 = X_train.reshape(len(X_train), -1)
+            X_flat_0 = torch.tensor(X_flat_0)
+            X_flat_0 = X_flat_0.to(torch.float32)
 
-            # Salva le immagini query selezionate
-            active_images = os.path.join(ret_path, "query", str(x))
-            if not os.path.exists(active_images):
-                os.makedirs(active_images)
+            for q in range (0, n_query):
+                X_flat = X_train[Y_train==0].reshape(len(X_train[Y_train==0]), -1)
+                X_flat=torch.tensor(X_flat)
+                X_flat = X_flat.to(torch.float32)
 
-            for ex, idx in enumerate(query_indices):
-                query_image = X_train[Y_train == 0][idx]
+                dist_matrix = torch.cdist(X_flat_0, X_flat_0, p=2).cpu().numpy()
+                dist_matrix = (dist_matrix - dist_matrix.min()) / (dist_matrix.max() - dist_matrix.min())
+                dist_matrix = dist_matrix.astype(np.float64)
+                dist_matrix = np.exp(dist_matrix / tau)
+                idx_ = np.argmin(np.mean(dist_matrix, 0))
+
+                idx_active.append(idx_)
+
+                p = dist_matrix[idx_active].min(0)
+                p = p / p.sum()
+
+                customDist = stats.rv_discrete(name='custm', values=(np.arange(len(p)), p))
+                idx_ = customDist.rvs(size=1)[0]
+                while idx_ in idx_active:
+                    idx_ = customDist.rvs(size=1)[0]
+                idx_active.append(idx_)
+
+
+                data_path = os.path.join(data, str(x + 1))
+                if not os.path.exists(data_path):
+                    os.makedirs(data_path)
+
+                # Salva le immagini query selezionate
+                active_images = os.path.join(ret_path, "query", str(x))
+                if not os.path.exists(active_images):
+                    os.makedirs(active_images)
+
+                query_image = X_train[idx_]
                 img_to_save = Image.fromarray(query_image.astype(np.uint8))
-                img_to_save.save(os.path.join(active_images, f"{ex}.png"))
+                img_to_save.save(os.path.join(active_images, f"{q}.png"))
 
-            # Aggiorna i dati (e.g., maschere e dataset)
-            mask_images = os.path.join(ret_path, "mask", str(x))
-            if not os.path.exists(mask_images):
-                os.makedirs(mask_images)
+                # Aggiorna i dati (e.g., maschere e dataset)
+                mask_images = os.path.join(ret_path, "mask", str(x))
+                if not os.path.exists(mask_images):
+                    os.makedirs(mask_images)
 
-            for ex, idx in enumerate(query_indices):
-                mask_from_gt = GT_expert[Y_train == 0][idx]
+
+                mask_from_gt = GT_expert[idx_]
                 mask_img = Image.fromarray(mask_from_gt.astype(np.uint8))
-                mask_img.save(os.path.join(mask_images, f"{ex}_mask.png"))
+                mask_img.save(os.path.join(mask_images, f"{q}_mask.png"))
 
-            # Aggiorna i dataset
-            for ex, idx in enumerate(query_indices):
-                mask_img = Image.open(os.path.join(mask_images, f"{ex}_mask.png"))
+                mask_img = Image.open(os.path.join(mask_images, f"{q}_mask.png"))
                 mask_array = np.array(mask_img)
-                X_train, Y_train, GT_train, X_test, Y_test, GT_test = update_datasets(idx, mask_array, X_train, Y_train,
+                X_train, Y_train, GT_train, X_test, Y_test, GT_test = update_datasets_kmeans(idx_, mask_array, X_train, Y_train,
                                                                                       GT_train)
                 np.save(open(os.path.join(data_path, f'X_train.npy'), 'wb'), X_train)
                 np.save(open(os.path.join(data_path, f'Y_train.npy'), 'wb'), Y_train)
@@ -174,6 +204,9 @@ if __name__ == '__main__':
                 print("unlabeled lambda: ", lambda_u)
                 print("normal lambda: ", lambda_n)
                 print("anomalous lambda: ", lambda_a)
+
+                #idx_active = np.where(Y_train != 0)[0].tolist()
+
 
             # Procedi con l'addestramento per l'iterazione 0
             print("Avviando l'addestramento sulla base delle query selezionate...")
@@ -245,12 +278,12 @@ if __name__ == '__main__':
 
         for ex in range (0,n_query):
             #adding min score selection
-            '''if (ex <= n_query/3):
+            if (ex < n_query/2):
                 idx = np.argsort(scores[Y_train == 0])[::-1]
                 print("ex: ", ex, "con errore piu alto")
-            elif (ex > n_query/3):
+            elif (ex >= n_query/2):
                 idx = np.argsort(scores[Y_train == 0])
-                print("ex: ", ex, "con errore piu basso")'''
+                print("ex: ", ex, "con errore piu basso")
 
             idx = np.argsort(scores[Y_train == 0])[::-1]
             print("ex: ", ex, "con errore piu alto")

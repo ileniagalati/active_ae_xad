@@ -43,12 +43,31 @@ def training_active_aexad(data_path, epochs, dataset, lambda_p, lambda_u, lambda
 
     return heatmaps, scores, _, _, tot_time, output
 
+def update_datasets_kmeans(image_idx, mask_array, X_train, Y_train, GT_train):
+    #indices_zero = np.where(Y_train == 0)[0]
+    #print("len: ",len(indices_zero))
+
+    if np.sum(mask_array) > 0:
+        #Y_train[indices_zero[image_idx]] = -1
+        Y_train[image_idx] = -1
+        #GT_train[indices_zero[image_idx]] = mask_array
+        GT_train[image_idx] = mask_array
+    else:
+        Y_train[image_idx] = 1
+        GT_train[image_idx] = mask_array
+
+    X_test = X_train
+    Y_test = Y_train
+    GT_test = GT_train
+
+    return X_train, Y_train, GT_train, X_test, Y_test, GT_test
+
 def update_datasets(image_idx, mask_array, X_train, Y_train, GT_train):
     indices_zero = np.where(Y_train == 0)[0]
+    print("len: ",len(indices_zero))
 
     if np.sum(mask_array) > 0:
         Y_train[indices_zero[image_idx]] = -1
-
         GT_train[indices_zero[image_idx]] = mask_array
     else:
         Y_train[indices_zero[image_idx]] = 1
@@ -106,6 +125,8 @@ def Kmeans_dist(embs, K, tau=0.1):
     idx_active.append(idx_)
 
     while len(idx_active) < K:
+        print("len kmeans: ", len(idx_active))
+        print("len k: ", K)
         p = dist_matrix[idx_active].min(0)
         p = p / p.sum()
 
