@@ -10,7 +10,7 @@ ds="mvtec"
 htmap_stats = []
 det_stats = []
 
-ret_path = "mvtec_results/leather/b_split/250ep_75ep_iteration_20b/weights/0.5/29"
+ret_path = "mvtec_results/leather/kmeans/250ep_75iep_dlr01_0.0005_10b_2_onlykmeans/weights/1.0/29"
 GT = np.load(open(os.path.join(ret_path,"output", 'gt.npy'), 'rb'))
 Y = np.load(open(os.path.join(ret_path,"output", 'labels.npy'), 'rb'))
 
