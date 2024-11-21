@@ -111,22 +111,20 @@ def plot_results_anom_top(path, method):
     if method == 'aaexad':
         idx = np.argsort(scores_aexad[Y_test == 1])[::-1]
 
-    plt.title(f'{method}')
-
     htmaps_aexad_f = gaussian_blur2d(torch.from_numpy(htmaps_aexad), kernel_size=(15, 15), sigma=(4, 4))
 
-    examples = 5
+    examples = 2
     for i in range(examples):
         image = X_test[Y_test == 1][idx[i]]
         image = image.transpose(2,0,1)
         plot_image(image)
-        plt.savefig(os.path.join(ret_path,"plot",f"img_{i}.png"))
+        plt.savefig(os.path.join(path,f"img_{i}.png"))
         plot_heatmap(htmaps_aexad_f[Y_test == 1][idx[i]])
-        plt.savefig(os.path.join(ret_path,"plot",f"ht_{i}.png"))
+        plt.savefig(os.path.join(path, f"ht_{i}.png"))
         gt=GT_test[Y_test == 1][idx[i]]
         gt = gt.transpose(2,0,1)
         plot_heatmap(gt)
-        plt.savefig(os.path.join(ret_path,"plot",f"gt_{i}.png"))
+        plt.savefig(os.path.join(path,f"gt_{i}.png"))
 
 
 def plot_iteration_results(path, it, model_type):
@@ -154,7 +152,7 @@ def plot_iteration_results(path, it, model_type):
                 plot_heatmap(htmaps_aexad[Y == 1][x])
                 plt.savefig(os.path.join(subpath, f"ht_{i}_{x}.png"))
 
-plot_iteration_results("mvtec_results/leather/b_split/250ep_50ep_iteration/weights/1.0/29", 1, 'aaexad')
+#plot_iteration_results("mvtec_results/leather/b_split/250ep_50ep_iteration/weights/1.0/29", 1, 'aaexad')
 
 import os
 import matplotlib.pyplot as plt
@@ -199,17 +197,16 @@ for i in range(0,6):
     output_path=f"mvtec_results/decreasing queries/weights/1.0/29/logs/plot/{i}.png"
     table(folder_path,output_path)'''
 
-'''
 
-ret_path = "mvtec_results/weights/0.5/29"
+i=0
+ret_path = "mvtec_results/leather/b_split/250ep_50ep_iteration/weights/1.0/29"
 GT_test = np.load(open(os.path.join(ret_path, "output", 'gt.npy'), 'rb'))
 Y_test = np.load(open(os.path.join(ret_path, "output", 'labels.npy'), 'rb'))
-htmaps_aexad = np.load(open(os.path.join(ret_path, "output",'aexad_htmaps_f.npy'), 'rb'))
-scores_aexad = np.load(open(os.path.join(ret_path, "output",'aexad_scores_f.npy'), 'rb'))
-X_test=np.load(open(os.path.join(ret_path, "test_data", 'X_test.npy'), 'rb'))
+htmaps_aexad = np.load(open(os.path.join(ret_path, "logs",str(i),f'aexad_htmaps_{i}.npy'), 'rb'))
+scores_aexad = np.load(open(os.path.join(ret_path, "logs",str(i),f'aexad_scores_{i}.npy'), 'rb'))
+X_test=np.load(open(os.path.join(ret_path, "test_data", str(i),'X_test.npy'), 'rb'))
 
-if not os.path.exists(os.path.join(ret_path,"plot")):
-    os.makedirs(os.path.join(ret_path,"plot"))
-plot_results_anom_top(ret_path,'aaexad')
+if not os.path.exists(os.path.join(ret_path,"plot_final",str(i))):
+    os.makedirs(os.path.join(ret_path,"plot_final",str(i)))
+plot_results_anom_top(os.path.join(ret_path,"plot_final",str(i)),'aaexad')
 
-'''
